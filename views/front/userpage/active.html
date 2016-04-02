@@ -1,0 +1,31 @@
+<div class="personal-cont clearfix">
+    <ul class="work clearfix">
+        <li ng-repeat="active in actives.$array">
+            <div class="margin20">
+                <a href="/front/toActivetail/{{ active._id }}" target="_blank">
+                    <img class="hdimg"  ng-src="{{ active.convertUrl }}" />
+                    <h3><a href="#">{{ active.title }}</a></h3>
+                <a>
+                <div class="cz">
+                    <span class="date lt">
+                        活动时间：
+                         {{ active.actStartTime | date:'yyyy-MM-dd' }}
+                            ——
+                         {{ active.actOverTime | date:'yyyy-MM-dd' }}
+                    </span>
+                </div>
+            </div>
+        </li>
+
+    </ul>
+    <div class="page">
+                        <span><a ng-show="actives.$last"
+                                 ng-click="actives.$toLast();">上一页</a></span>
+                        <span><a ng-show="actives.$next"
+                                 ng-click="actives.$toNext();">下一页</a></span>
+                        <span>
+                            <a>{{ actives.$curPage }}/{{ actives.$pageCount }}</a>
+                        </span>
+        <span> <a>活动:{{ actives.$totalSize }}</a></span>
+    </div>
+</div>

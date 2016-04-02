@@ -1,0 +1,123 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" ng-app="myApp">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>活动详情页</title>
+    <% include ../include/baseLink%>
+    <link rel="stylesheet" href="/front/resource/css/login.css"/>
+</head>
+<script type="text/javascript">
+    function show(a){
+        $("div[id^='hdtab']").hide();
+        $("#hdtab"+a).show();
+        $(".hdcon span[class^='tab']").removeClass("over");
+        $(".tab"+a).addClass("over");
+    };
+</script>
+<body ng-controller="active_detail_control">
+<% include ../include/head %>
+<div class="wap clearfix">
+    <div class="on-1200">
+        <div class="active-head-img">
+            <a href="" ng-click="doJoinActive()" ><img src="<%- active.convertUrl %>" width="1152" height="340" /></a>
+        </div>
+        <div class="hdcon clearfix">
+            <div class="title"><span class="tab1 over" onclick="show('1')">大赛简介</span><span class="tab2" onclick="show('2')">参赛作品</span><span class="tab3" onclick="show('3')">赛事播报</span></div>
+            <div class="cont" id="hdtab1">
+                <div class="hotop">
+                    <span class="tle">大赛简介</span>
+                </div>
+                <div class="nrs">
+                    <%- active.content %>
+                </div>
+
+             <%   if(active.attachment && active.attachment.name){ %>
+                <div class="fujian"><span class="fjtle"><a href="/downFileName?fileurl=<%- active.attachment.url  %>&filename=<%- active.attachment.name  %>" title="<%- active.attachment.name  %>">
+                            <img src="/front/resource/images/fujian.jpg" /></a><p>
+                            <%- active.attachment.name  %></p></span></div>
+             <%   } %>
+
+            </div>
+            <div class="contb" id="hdtab2">
+                <div class="hotop">
+                    <span class="tle">参赛作品</span>
+                    <span class="works rt">作品数量<b><%- active.works.length %></b></span>
+                    <span class="px rt"><a href="#">全部</a><a href="#">浏览数</a><a href="#">票数</a></span>
+                </div>
+                <div class="hdwork clearfix">
+                    <ul>
+                        <li ng-repeat="work in works.$array">
+                            <dl class="showOverPic">
+                                <dd
+                                    ng-repeat="pic in work.fileUrls"
+                                    data-sub-html="{{ pic.name }}"
+                                    data-src="{{pic.url}}"
+                                    ng-show="!$index>0"
+                                    >
+                                    <a href="" ng-click="addWorkCheck(work)"><img class="zpimg"  ng-src="{{pic.url}}" /></a>
+                                </dd>
+                            </dl>
+                            <h3>{{work.fileUrls[0].name}}</h3>
+                            <div class="hdbq">
+                                <span class="zz">作者：<b>{{ work.$user.name }}</b></span>
+                                <span class="see">浏览：<b>{{ work.checkcounts }}</b></span>
+                                <span class="tp">投票：<b>{{ work.votes.length }}</b></span>
+                            </div>
+                            <div class="hdbq"  ng-click="voteWork(work);" ng-show="!!!_.contains(work.votes,userId)">
+                                <span class="tota">投他一票</span>
+                            </div>
+                            <div class="hdbq"  ng-show="!!_.contains(work.votes,userId)">
+                                <span class="tota">已投票</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="page">
+                        <span><a ng-show="works.$last"
+                                 ng-click="works.$toLast()">上一页</a></span>
+                        <span><a ng-show="works.$next"
+                                 ng-click="works.$toNext()">下一页</a></span>
+                        <span>
+                            <a>{{ works.$curPage }}/{{ works.$pageCount }}</a>
+                        </span>
+                    <span> <a>作品:{{ works.$totalSize }}</a></span>
+                </div>
+                <div class="likes">
+                    <active-like actid="<%- active._id %>" cusid="<%- $session.USER ? $session.USER._id : '' %>"></active-like>
+
+                    <active-collect actid="<%- active._id %>" cusid="<%- $session.USER ? $session.USER._id : '' %>"></active-collect>
+                </div>
+            </div>
+            <div class="contc" id="hdtab3">
+                <div class="hotop">
+                    <span class="tle">赛事播报</span>
+                </div>
+                <div class="nrs">
+                    <%- active.report   %>
+                </div>
+                <div class="likes">
+                    <span><a title="喜欢"><img src="/front/resource/images/lisk.jpg" /></a><p>365人喜欢</p></span>
+                    <span><a title="收藏"><img src="/front/resource/images/scang.jpg" /></a><p>478人收藏</p></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<% include ../include/foot %>
+<script type="text/javascript">
+
+    $(document).ready(function(){
+        setTimeout(function(){
+            $('.showOverPic').lightGallery();
+
+        },1000)
+    });
+
+    GLOBAL_ACTIVE_POJO = {
+        _id:"<%- active._id %>",
+        _userId:"<%- $session.USER ? $session.USER._id : '' %>",
+    }
+</script>
+<script type="text/javascript"  src="/front/dist/active_detail.js"></script>
+</body>
+</html>

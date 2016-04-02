@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" ng-app="myApp">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>发现详情页</title>
+    <% include ../include/baseLink%>
+</head>
+<body ng-controller="art_detail_control">
+<% include ../include/head %>
+<div class="wap clearfix">
+    <div class="on-900 clearfix lt">
+        <div class="smthing detail">
+            <div class="title">
+                <div class="lt">
+                    <h3><%- article.title %></h3>
+                    <div class="tabs">
+                    <% _.each(article.keyword,function(ele){ %>
+                         <a href="#" class="over"><%- ele %></a>
+                    <%    }) %>
+                        <span class="txtfrom">文章来源:<%- article.from %></span>
+                        <span class="leix">发表于
+                            <a href="#"><%- article.cate1 ? article.cate1.cateName : '' %></a>
+                            </span>   
+                        </div>
+                </div>
+                <div class="rt">
+                    <div class="">
+                    <span>发布时间:<%- $moment(article.creatTime).format("YYYY-MM-DD") %>
+                        &nbsp;&nbsp;/&nbsp;&nbsp;
+                        <%- article.checkcounts %>次浏览</span></div>
+                    <div class="thingshar">我要分享</div>
+                </div>
+            </div>
+            <div class="info"><%- article.introduce  %></div>
+            <div class="cont">
+               <%- article.content %>
+            </div>
+            <div class="likes">
+                <span ng-show="!LikeFlag">
+                    <a title="喜欢" ng-click="parseArticle();">
+                    <img src="/front/resource/images/lisk.jpg" />
+                    </a><p>{{ article.praiseCounts.length }}</p>
+                    喜欢
+                </span>
+                <span ng-show="LikeFlag">
+                    <a title="喜欢" ng-click="callParse();">
+                        <img src="/front/resource/images/lisk.jpg" />
+                    </a><p>{{ article.praiseCounts.length }}</p>
+                    不喜欢
+                </span>
+
+                <span ng-show="!collecFlag"><a title="收藏">
+                    <a href="" ng-click="addCollectArticle()">
+                        <img src="/front/resource/images/scang.jpg"/></a><p>
+                    </a>
+                    {{ article.collections.length  }}人收藏</p>
+                    收藏
+                </span>
+
+                <span ng-show="collecFlag"><a title="收藏">
+                    <a href="" ng-click="cancelCollectArticle()">
+                        <img src="/front/resource/images/scang.jpg"/></a><p>
+                    </a>
+                    {{ article.collections.length  }}人收藏</p>
+                    取消收藏
+                </span>
+            </div>
+        </div>
+        <div class="comment clearfix">
+            <div class="shuruk">
+                <div class="ruka">
+                    <textarea 
+                            ng-model="commentPojo.content"
+                            placeholder="在此输入您的评论">
+                    </textarea>
+                </div>
+                <div class="rukb">
+                <span>已有<b>{{ ArticleCommentCount }}</b>人评论</span>
+                <span class="subt">
+                <input type="button" value="发布" 
+                       ng-click="subComment();" /></span>
+                </div>
+            </div>
+            <div class="list clearfix" ng-repeat="comment in array_comments.$array">
+                <div class="portrait">
+                    <a href="/front/toCusDetail/{{ comment._userId }}">
+                        <img class="zz" src="/front/resource/images/pozhezhao.png" />
+                        <img class="tx" width="70" height="70"  ng-src="{{  comment.headUrl  }}"/>
+                    </a>
+                </div>
+                <div class="midle lt">
+                    <div class="username"><a href="#">{{ comment.userName }}</a></div>
+                    <div class="det">{{ comment.content }}</div>
+                </div>
+                <div class="other rt">
+                    <span class="time">{{ comment.creatTime | date:'yyyy-MM-dd' }}</span>
+                    <span class="time">{{ comment.creatTime | date:'HH:mm' }}</span>
+                    <span class="time" style="cursor: pointer;" ng-click="doCommpent(comment);">评论</span>
+                </div>
+                <div>
+                    <div class="seclist" ng-repeat="replay in comment.replays">
+                        <div class="userpor">
+                            <a href="/front/toCusDetail/{{ replay._userId }}">
+                                <img class="t1" src="/front/resource/images/smalzz.png" />
+                                <img class="t2" ng-src="{{ replay.headUrl  }}" width="44" height="44" />
+                            </a>
+                        </div>
+                        <div class="mid">
+                            <h7>{{ replay.toName ? replay.userName+' @ '+replay.toName : replay.userName  }}</h7>
+                            <div class="nr">{{ replay.content }}</div>
+                        </div>
+                        <div class="date">
+                            <span class="time">{{ replay.creatTime | date:'yyyy-MM-dd' }}</span>
+                            <span class="time">{{ replay.creatTime | date:'HH:mm' }}</span>
+                            <span class="time"><span class="time" ng-click="toReplay(replay,comment);" style="cursor: pointer;">回复</span></span>
+                        </div>
+                    </div>
+                </div>
+                <div ng-show="comment.replayIng" class="seclist">
+                    <div class="huifu">
+                        <h7>{{ comment.tips }}</h7>
+                        <div class="nr"><textarea  ng-model="comment.replayContent"></textarea></div>
+                        <button  ng-click="sendReply(comment)">提交</button>
+                    </div>
+                </div>
+            </div>
+            <div class="clikemore">
+            <span  ng-if="array_comments.$next" 
+                   ng-click="array_comments.$toNext();">点击加载更多</span>
+            <span  ng-if="!array_comments.$next">没有更多了</span>
+           </div>
+        </div>
+    </div>
+    <div class="on-285 clearfix rt">
+                <%   if(article.$user && article.$user.cate1.cateId === 1){ %>
+                <%        var user = article.$user;    %>
+                <div class="cyr-bt">
+                    <div class="top">
+                            <div class="top-head">
+                                <a href="/front/toCusDetail/<%- user._id %>">
+                                  <img class="zz" src="/front/resource/images/peozhezhao.png" />
+                                  <img class="tx" src="<%- user.imgurl  %>" />
+                                </a>
+                            </div>
+                            <div class="top-txt">
+                                <a href="/front/toCusDetail/<%- user._id %>">
+                                    <span class="name"><%- user.realName %></span><br />
+                                </a>
+                                <span class="jop">职业：<%- user.job.cateName %></span><br />
+                                <span class="fans">粉丝：{{ follwsCount }}</span><br />
+                                <span class="gz">
+                                    <attention-load
+                                            count="<%- user.followers.length  %>"
+                                            cusid="<%- user._id %>"
+                                            fanscount=follwsCount
+                                            >
+                                    </attention-load>
+                                </span>
+                            </div>
+                    </div>
+                    <div class="botttom"></div>
+                </div>
+                <%    } %>
+        <div class="recod">
+            <%  _.each($randomData,function(ele){  %>
+                <div class="lia">
+                    <a href="/front/toArtDetail/<%- ele._id %>"><img ng-src="<%- ele.imgUrl %>" /></a>
+                    <p><a href="/front/toArtDetail/<%- ele._id %>"><%- ele.title %></a></p>
+                </div>
+            <%  }) %>
+        </div>
+    </div>
+</div>
+
+<% include ../include/foot %>
+<script type="text/javascript"> 
+    GLOBAL_ARTILCE_ID = "<%- article._id %>";//文章ID
+    GLOBAL_ARTILCE_COMMENTCOUNT = "<%- article.comments.length  %>";
+
+    //名人信息
+    GLOBAL_CUSTOMER = {
+        "_id":'<%- article.$user ? article.$user._id : '' %>',
+    }
+
+    //用户信息
+    GLOBAL_USER = {
+        "_id":"<%- $session.USER ? $session.USER._id : "" %>",
+        "name":"<%- $session.USER ? $session.USER.name : "" %>",
+        "headUrl":"<%- $session.USER ? $session.USER.imgurl : "" %>",
+    }
+
+</script>
+<script type="text/javascript"  src="/front/dist/art_detail.js"></script>
+</body>
+</html>

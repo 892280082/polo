@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en" ng-app="myApp">
+<head>
+    <meta charset="UTF-8">
+    <% include ../include/baseLink %>
+    <title>活动信息管理</title>
+    <script type="text/javascript" src="/back/dist/active.js"></script>
+</head>
+<body ng-controller="main">
+<div class="rt_content">
+    <ts-cuslist ng-if="show.cuslist"></ts-cuslist>
+    <ts-cusadd ng-if="show.cusadd"></ts-cusadd>
+</div>
+<!-- 活动列表页面 -->
+<script type="text/ng-template" id="cuslist">
+    <div class="page_title">
+        <h2 class="fl">活动信息列表</h2>
+    </div>
+    <section>
+        <label>活动名称:</label>
+        <input type="text" class="textbox textbox_295"  ng-model="search_custom.$$_title" />
+        <input type="button" value="查询"  ng-click="search();" class="group_btn"/>
+    </section>
+    <section>
+        <div class="page_title">
+            <h2 class="fl">例如产品详情标题</h2>
+            <a class="fr top_rt_btn"  ng-click="changeIntoEdit()">添加活动</a>
+        </div>
+        <table class="table">
+            <tr>
+                <th>ID</th>
+                <th>活动标题</th>
+                <th>活动类型</th>
+                <th>报名状态</th>
+                <th>活动状态</th>
+                <th>点击量</th>
+                <th>喜欢</th>
+                <th>收藏</th>
+                <th>投票</th>
+                <th>创建日期</th>
+                <th>作品数</th>
+                <th>操作</th>
+            </tr>
+            <tr ng-repeat="cus in array_custom.$array">
+                <td>{{ $index + 1}}</td>
+                <td width="8%"  style="cursor: pointer"  ng-click="changeIntoEdit(cus);">{{ cus.title }}</td>
+                <td width="10%" >
+                    {{ cus.cate1.cateName }}
+                </td>
+                <td width="5%" >
+                    {{  validateTime(cus.signStarTime,cus.signOverTime,['未开始','报名中','已截止']) }}
+                </td>
+                <td width="5%" >
+                    {{  validateTime(cus.actStartTime,cus.actOverTime,['未开始','进行中','已结束']) }}
+                </td>
+                <td width="6%">{{ cus.checkcounts }}</td>
+                <td width="7%" >{{ cus.likes.length }}</td>
+                <td width="7%" >{{ cus.collects.length }}</td>
+                <td width="7%" >{{ cus.votes.length }}</td>
+                <td width="13%">{{ cus.works.length }}</td>
+                <td width="6%">{{ cus.topno }}</td>
+                <td>
+                    <a class="inner_btn"  ng-click="removeCustom(cus);"  href="#">删除</a>
+                    <a class="inner_btn"  ng-if="parentShow"   ng-click="parentChoose(cus);"
+                       href="#">选定</a>
+                </td>
+            </tr>
+        </table>
+        <aside class="paging">
+            <a ng-show="array_custom.$last"  ng-click="array_custom.$toLast()">上一页</a>
+            <!--<a>1</a>-->
+            <a>{{ array_custom.$curPage }}/{{ array_custom.$pageCount }}</a>
+            <a ng-show="array_custom.$next"  ng-click="array_custom.$toNext()">下一页</a>
+            <a>总条数:{{ array_custom.$totalSize }}</a>
+        </aside>
+    </section>
+</script>
+<!-- 活动添加编辑页面-->
+<script type="text/ng-template" id="cusadd" >
+    <div class="page_title top1">
+        <h2 class="fl">{{ pojo_custo._id ? '活动编辑' : '活动添加' }}</h2>
+        <a class="fr top_rt_btn" ng-click="toPageList();" >返回</a>
+    </div>
+    <div>
+        <h2 class="fl" ng-if="pojo_custo._id">活动数据编辑</h2>
+    </div>
+    <section>
+        <form
+                name="subForm"
+                ng-submit="saveOrUpdate()"
+                >
+            <table class="datatable">
+                <tr>
+                    <td colspan="6" style="text-align: left;" class="tle1">活动基本信息</td>
+                </tr>
+                <tr>
+                    <td class="tname"><label>活动名:</label></td>
+                    <td class="tiput" style="width: 200px;">
+                        <input type="text"  ng-model="pojo_custom.title"  name="t_title"
+                               class="textbox" required placeholder="请输入你的昵称" />
+                    </td>
+                    <td class="tip" ><span class="errorTips" ng-show="subForm.t_title.$error.required">输入名称</span></td>
+                    <td class="tname"><label>活动分类:</label></td>
+                    <td class="tiput">
+                        <select  ng-model="pojo_custom.cate1" name="t_usertype"
+                                 ng-options="(m.cateId + '-------' + m.cateName)  for m in webConfig.activeCates">
+                            <option value="">-- 当前:-- {{ pojo_custom.cate1.cateName }}  --</option>
+                        </select><br/>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="tname"><label>活动关键字:</label></td>
+                    <td class="tiput"><input ng-click="manngerKey()"
+                                             type="text"
+                                             placeholder="{{ pojo_custom.keyword }}"
+                                             name="t_keyword"
+                                             class="textbox" /><br/>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="tname"><label>点击量:</label></td>
+                    <td class="tiput"><input type="text"  ng-model="pojo_custom.checkcounts"  name="t_checkcounts"
+                                             class="textbox"/></td>
+                    <td class="tip"><span class="errorTips" ng-show="subForm.t_checkcounts.$error.required">请输入</span></td>
+                    <td class="tname"><label>是否开放:</label></td>
+                    <td><input type="radio"   ng-model="pojo_custom.status" ng-value="true"
+                               class="textbox" />是
+                        <input type="radio"  ng-model="pojo_custom.status" ng-value="false"
+                               class="textbox" />否
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="1"><label>活动介绍:</label></td>
+                    <td colspan="5"><textarea class="textarea" style="width:635px;height:100px;"
+                                              ng-model="pojo_custom.introduce" name="t_introduce" ></textarea>
+                    </td>
+                    <td><span class="errorTips" ng-show="subForm.t_introduce.$error.required">请输入介绍</span></td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align: left;" class="tle1">上传作品分类限定 <a href="" ng-click="resetWorkCate()">重置</a></td>
+                </tr>
+                <tr>
+                    <td class="tname"><label>一级分类:</label></td>
+                    <td class="tiput">
+                        <select  ng-model="pojo_custom._workCate1" name="t_usertype"
+                                 ng-options="(m.cateId + '----' + m.cateName)  for m in pojo_custom.workCate">
+                            <option value="">-- 请选择 --</option>
+                        </select>
+                        <a href=""
+                           ng-show="pojo_custom._workCate1"
+                           ng-click="removeCate(pojo_custom.workCate,pojo_custom._workCate1)">删除</a> <br/>
+                    </td>
+                    <td></td>
+                    <td class="tname"><label>二级分类:</label></td>
+                    <td class="tiput">
+                        <select  ng-model="pojo_custom._workCate2" name="t_usertype"
+                                 ng-options="(m.cateId + '----' + m.cateName)  for m in pojo_custom._workCate1.subCate">
+                            <option value="">-- 请选择 --</option>
+                        </select><a href=""
+                            ng-show="pojo_custom._workCate2"
+                            ng-click="removeCate(pojo_custom._workCate1.subCate,pojo_custom._workCate2)">删除</a> <br/>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align: left;" class="tle1">时间地址</td>
+                </tr>
+                <tr>
+                    <td class="tname"><label>活动开始日期:</label></td>
+                    <td class="tiput"><input type="text"  ng-model="pojo_custom.actStartTime"
+                                             date-picker required
+                                             class="textbox Wdate" /></td>
+                    <td></td>
+                    <td class="tname"><label>活动结束日期:</label></td>
+                    <td class="tiput"><input type="text"  ng-model="pojo_custom.actOverTime"  date-picker required
+                                             class="textbox Wdate"  /></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="tname"><label>报名开始日期:</label></td>
+                    <td class="tiput"><input type="text"  ng-model="pojo_custom.signStarTime"
+                                             date-picker required
+                                             class="textbox Wdate" /></td>
+                    <td></td>
+                    <td class="tname"><label>报名结束日期:</label></td>
+                    <td class="tiput"><input type="text"  ng-model="pojo_custom.signOverTime"  date-picker required
+                                             class="textbox Wdate"   /></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="tname"><label>活动地址:</label></td>
+                    <td class="tiput"><input type="text"
+                                             ng-model="pojo_custom.address"
+                                             class="textbox" /></td>
+                    <td></td>
+                </tr>
+
+                <tr>
+                    <td colspan="6" style="text-align: left;" class="tle1">作品要求</td>
+                </tr>
+                <tr>
+                    <td class="tname"><label>作品类型限制:</label></td>
+                    <td class="tiput" style="width: 200px;">
+                        <input type="text"  ng-model="pojo_custom.demand.fileType"  name="t_demand_type"
+                               class="textbox" required placeholder="多类型用空格隔开" />
+                    </td>
+                    <td class="tip" ></td>
+                    <td class="tname"><label>文件大小限制:</label></td>
+                    <td class="tiput" style="width: 200px;">
+                        <input type="text"  ng-model="pojo_custom.demand.fileSize"  name="t_demand_size"
+                               class="textbox" required placeholder="单位M,默认:10M" />
+                    </td>
+                    <td class="tip" ></td>
+                </tr>
+                <tr>
+                    <td class="tname"><label>文件个数限制:</label></td>
+                    <td class="tiput" style="width: 200px;">
+                        <input type="text"  ng-model="pojo_custom.demand.fileMax"  name="t_demand_max"
+                               class="textbox" required placeholder="默认20" />
+                    </td>
+                    <td class="tip" ></td>
+                    <td class="tname"><label>特殊要求:</label></td>
+                    <td class="tiput" style="width: 200px;">
+                        <input type="text"  ng-model="pojo_custom.demand.introduce"  name="t_demand_max"
+                               class="textbox" required placeholder="作品特殊要求，例如图片像素和模式" />
+                    </td>
+                    <td class="tip" ></td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align: left;" class="tle1">活动申明</td>
+                </tr>
+                <tr>
+                    <td class="tname"><label>组织机构:</label></td>
+                    <td class="tiput" style="width: 200px;">
+                        <input type="text"  ng-model="pojo_custom.organize"  name="t_organize"
+                               class="textbox" required placeholder="安徽雅集文化研究中心" />
+                    </td>
+                    <td class="tip" ><span class="errorTips" ng-show="subForm.t_organize.$error.required">必填</span></td>
+                    <td class="tname"><label>版权申明:</label></td>
+                    <td class="tiput" style="width: 200px;">
+                        <input type="text"  ng-model="pojo_custom.copyRight"  name="t_copyRight"
+                               class="textbox" required placeholder="安徽雅集文化所有" />
+                    </td>
+                    <td class="tip" ><span class="errorTips" ng-show="subForm.t_copyRight.$error.required">必填</span></td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align: left;" class="tle1">活动推荐</td>
+                </tr>
+                <tr>
+                    <td class="tname"><label>首页排序:</label></td>
+                    <td class="tiput" style="width: 200px;"><input type="text"  ng-model="pojo_custom.topno"  
+                                name="t_topno" class="textbox"  placeholder="首页banner的顺序" /></td>
+                    <td class="tip" ></td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align: left;" class="tle1">活动图像</td>
+                </tr>
+                <tr>
+                    <td  class="tname"><label>首页banner(1920*470):</label></td>
+                    <td class="tiput"><input type="file" nv-file-select="" uploader="uploader"   name="t_bannerUrl" />
+                        <img ng-src="{{ pojo_custom.bannerUrl}}" width="160px" height="140px" ng-if="pojo_custom.bannerUrl"/>
+                    <td class="tip"></td>
+                    <td class="tname"><label>活动封面(342*194):</label></td>
+                    <td class="tiput"><input type="file" nv-file-select=""  uploader="uploaderconvertUrl"
+                                              name="t_convertUrl" />
+                        <br/><img ng-src="{{ pojo_custom.convertUrl}}" width="160px" height="140px" ng-if="pojo_custom.convertUrl"/>
+                    </td>
+                    <td class="tip"></td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align: left;" class="tle1">活动附件</td>
+                </tr>
+                <tr>
+                    <td  class="tname"><label>附件上传:</label></td>
+                    <td class="tiput"><input type="file" nv-file-select="" uploader="fileUpload"/>
+                    <td class="tip"></td>
+                    <td class="tname"><label>附件下载:</label></td>
+                    <td class="tiput">
+                        <a href="/downFileName?fileurl={{pojo_custom.attachment.url }}&filename={{ pojo_custom.attachment.name }}"
+                           ng-if="pojo_custom.attachment.url" style="cursor:pointer;">{{ pojo_custom.attachment.name }}</a>
+                    </td>
+                    <td class="tip"></td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align: left;" class="tle1">活动详情</td>
+                </tr>
+                <tr>
+                    <td></td></de><td width="700px" height="500px" colspan="5">
+                        <div
+                                style="width:700px;height:500px;float:left"
+                                class="ueditor" config="config"
+                                ng-model="pojo_custom.content">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align: left;" class="tle1">活动播报</td>
+                </tr>
+                <tr>
+                    <td></td></de><td width="700px" height="500px" colspan="5">
+                        <div
+                                style="width:700px;height:500px;float:left"
+                                class="ueditor" config="config"
+                                ng-model="pojo_custom.report">
+                        </div>
+                    </td>
+                </tr>
+                <tr ng-if="pojo_custom.articles && pojo_custom.productions">
+                    <td colspan="6" style="text-align: left;" class="tle1">活动数据</td>
+                </tr>
+                <tr ng-if="pojo_custom.likes && pojo_custom.collects">
+                    <td><label>喜欢数量:</label></td>
+                    <td colspan="2">{{ pojo_custom.likes.length }}</td>
+                    <td><label>收藏数量:</label></td>
+                    <td colspan="2">{{ pojo_custom.collects.length }}</td>
+                </tr>
+                <tr ng-if="pojo_custom.votes">
+                    <td><label>投票数量:</label></td>
+                    <td colspan="2">{{ pojo_custom.votes.length }}</td>
+                    <td></td>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="text-align: center;">
+                        <input class="link_btn"  type="button" ng-click="saveOrUpdate();" value="提交" /></td>
+                    <td colspan="3" style="text-align: center;">
+                        <input class="link_btn" type="button"  ng-click="toPageList();"  value="取消" /></td>
+                </tr>
+            </table>
+        </form>
+    </section>
+</script>
+<script>
+    $(document).ready(function(){
+        //弹出关键字
+        $("#alertKeyPage").click(function(){
+            $("#pageKey").fadeIn();
+        });
+        $(".falseBtn").click(function(){
+            $("#pageKey").fadeOut();
+        });
+    });
+</script>
+<section id="pageKey" class="pop_bg ttty"  >
+    <div class="pop_cont">
+        <div class="">
+            <h3>关键字管理<input style="float: right;"  type="button" value="关闭"  class="input_btn falseBtn"/></h3>
+        </div>
+        <select  ng-model="articleKey"
+                 ng-options="m  for m in  _.difference(webConfig.activeKeys,pojo_custom.keyword)">
+                 <option value="">-- 请选择 --</option>
+        </select>
+        <input type="button" value="添加" ng-if="articleKey"
+               ng-click="pojo_custom.keyword.push(articleKey);" />
+        <br/>
+        <table style="text-align: center;">
+            <tr>
+                <td width="20%">序号</td>
+                <td width="60%">关键字</td>
+                <td width="20%">操作</td>
+            </tr>
+            <tr ng-repeat="key in pojo_custom.keyword">
+                <td>{{ $index }}</td>
+                <td>{{ key }}</td>
+                <td><input type="button"  ng-click="pojo_custom.keyword.remove(key);" value="删除"/> </td>
+            </tr>
+        </table>
+    </div>
+</section>
+
+</body>
+</html>
