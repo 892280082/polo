@@ -41,19 +41,19 @@
     </tr>
 </table>
 <div class="page">
-                        <span><a ng-show="persons.$last"
-                                 ng-click="persons.$toLast();">上一页</a></span>
-                        <span><a ng-show="persons.$next"
-                                 ng-click="persons.$toNext();">下一页</a></span>
-                        <span>
-                            <a>{{ persons.$curPage }}/{{ persons.$pageCount }}</a>
-                        </span>
+    <span><a ng-show="persons.$last"
+             ng-click="persons.$toLast();">上一页</a></span>
+    <span><a ng-show="persons.$next"
+             ng-click="persons.$toNext();">下一页</a></span>
+    <span>
+        <a>{{ persons.$curPage }}/{{ persons.$pageCount }}</a>
+    </span>
     <span> <a>活动:{{ persons.$totalSize }}</a></span>
 </div>
 </body>
+
+
 <link rel="stylesheet" type="text/css" href="/front/resource/css/ng-animation.css"/>
 <script type="text/javascript" src="/lib/angular/angular.js"></script>
-
 <script type="text/javascript" src="/front/dist/test.js"></script>
-
 </html>

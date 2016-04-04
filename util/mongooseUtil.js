@@ -290,14 +290,16 @@ exports.updateSingleById = function(pojo,Dao,callback){
     })
  */
 exports.pagination = function(params,callback){
-    var model = params.model;
+    var model = params.model || exports._save_Dao_state;
     if(!model)
-        callback('mongooseUtil ->pagination :   no set Dao');
+        return callback('mongooseUtil ->pagination :   no set Dao');
 
-    var condition = params.query || {},
-        skip = params.skip || 0,
-        limit = params.limit || 200,
-        sort = params.sort || {'_id':-1};
+    var body = params.req.body || {};
+
+    var condition = params.query || body.query || {},
+        skip = params.skip || body.skip || 0,
+        limit = params.limit || body.body || 20,
+        sort = params.sort || body.sort ||  {'_id':-1};
 
     var query = model.find({});
     _.mapObject(condition,function(value,key){
@@ -385,13 +387,19 @@ exports.contains = function(idArray,targetId){
 
 //封装基本的增删改查
 exports.createBaseCurd = function(url,Model,callback,router){
-    exports.Model = Model;
     //设置路由
     var saveUrl = url+'Save';
     var removeUrl = url + 'Remove';
     var updateUrl = url +'Update';
 
-    router.post(url,callback.bind(exports));
+    //分页请求
+    router.post(url,(function(){
+        var currenModel = Model;
+        return function(req,res){
+            exports._save_Dao_state = currenModel;
+            callback.call(exports,req,res);
+        }
+    }()));
 
     //增加
     router.post(saveUrl,function(req,res){

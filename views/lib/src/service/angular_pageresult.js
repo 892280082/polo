@@ -7,6 +7,9 @@
  * @param array {Array} 数组
  * @param obj {Object} 删除对象
  */
+var _ = require("underscore");
+
+
 function removeArray(array,obj){
     var flag = false;
     for(var i=0;i<array.length;i++){
@@ -33,32 +36,6 @@ function concactArray(array1,array2){
     return array1.concat(array2);
 }
 
-//对象转数组
-function argtoArray(pojo,size){
-    var i = 0,tempArray = [];
-    while(pojo[i]){
-        if(i<size){
-            i++;
-            continue;
-        }
-        tempArray.push(pojo[i++]);
-    }
-    return tempArray;
-}
-
-//获取对象属性个数
-function validatePojoIsNull(pojo){
-    if(typeof pojo === 'object'){
-        var i = 0;
-        for(var p in pojo)
-            i++;
-        if(i<=0){
-            return true;
-        }
-    }
-    return false;
-}
-
 //对象的拷贝
 function deepCopy(source) {
     var result={};
@@ -70,12 +47,39 @@ function deepCopy(source) {
     return result;
 }
 
+//对象属性覆盖
+function coverObject(newPojo){
+    var oldPojo = this;
+    _.mapObject(newPojo,function(val,key){
+        oldPojo[key] = val;
+    })
+    return oldPojo;
+}
+
+function updateLocalPojo(target){
+    var array = concactArray(this._readCache,this.$array);
+    array = concactArray(array,this._nextCache);
+    var oldpojo = _.find(array,function(ele){
+        return ele._id == target._id;
+    })
+    if(oldpojo){
+        _.mapObject(target,function(val,key){
+            oldpojo[key] = val;
+        })
+    }
+}
+
+
 //处理query  $$_ 模糊查询
 function dealQuery(query){
     var query = deepCopy(query);
     for(var p in query){
-        //处理属性为空 或者 属性是一个{}空对象
-        if(!query[p] || validatePojoIsNull(query[p])){
+
+        //删除属性
+        if(query[p] === ''
+            || typeof query[p] === 'undefined'
+            || (_.isObject(query[p]) &&  _.keys(query[p]).length <= 0)) {
+
             delete  query[p];
             continue;
         }
@@ -100,16 +104,6 @@ function dealQuery(query){
 
     }
     return query;
-}
-
-//给指定对象添加属性
-function pojoAddParam(pojo,paramPojo){
-    for(var i=0;i<paramPojo.length;i++){
-        var tempPojo = paramPojo[i];
-        for(var p in tempPojo)
-            pojo[p] = tempPojo[p];
-    }
-    return pojo;
 }
 
 angular.module("service_pageResult",[])
@@ -215,9 +209,12 @@ angular.module("service_pageResult",[])
                   : query = {};
 
             sort = sort || this._server_pojo.sort;
+
             if(antherSort){
-                antherSort = argtoArray(arguments,2);
-                sort = pojoAddParam(sort,antherSort);
+                sort = _.each(_.toArray(arguments).splice(2),function(ele){
+                            for(var p in ele)
+                                sort[p] = ele[p];
+                        })
             }
             this._server_pojo.query = query;
             this._server_pojo.skip = 0;
@@ -249,64 +246,80 @@ angular.module("service_pageResult",[])
             this._update();
         };
 
+        this._save = function(pojo){
+            this.$array.splice(0,0,pojo);
+            this.$totalSize++;
+            if(this.$curPage < this.$pageCount){
+                var _last = this.$array.pop();
+                this._nextCache.splice(0,0,_last);
+            }
+        };
         this.$save = function(pojo,callback){
+            if(callback == false)
+                return this._save(pojo)
+
             var _this = this;
-            var saveUrl = _this._server_url+'Save';
-            $http.post(saveUrl,{"savePojo":pojo})
+            var url = _this._server_url+'Save';
+            $http.post(url,{"savePojo":pojo})
                 .success(function(data){
                     if(!data.err){
-                        _this.$array.splice(0,0,data.result);
-                        _this.$totalSize++;
-                        if(_this.$curPage < _this.$pageCount){
-                            var _last = _this.$array.pop();
-                            _this._nextCache.splice(0,0,_last);
-                        }
+                        _this._save(data.result);
                         callback && callback(data.err,data.result);
                     }else{
-                        alert(saveUrl+":保存出错");
                         data.err && console.log(data.err);
+                        callback ? callback(data.err) :  alert(url+":保存出错");
                     }
                 }).error(function(){
                     alert("saveUrl:连接出错");
                 })
         };
 
-
+        this._remove = function(pojo){//删除本地数组中的元素
+            removeArray(this.$array,pojo);
+            if(this._nextCache.length>1){
+                this.$array.push(this._nextCache.splice(0,1)[0])
+            }
+            this.$totalSize--;
+        };
         this.$remove = function(pojo,callback){
+            if(!pojo._id || callback == false)
+                return this._remove(pojo);
+
             var _this = this;
             var url = _this._server_url+'Remove';
             $http.post(url,{_id:pojo._id})
                 .success(function(data){
                     if(!data.err){
-                        removeArray(_this.$array,pojo);//显示数组中删除
-                        if(_this._nextCache.length>1){
-                            _this.$array.push(_this._nextCache.splice(0,1)[0])
-                        }
-                        _this.$totalSize--;
+                        _this._remove(pojo);
                         callback && callback(data.err,data.result);
                     }else{
-                        alert("url->"+url+":保存出错");
                         data.err && console.log(data.err);
+                        callback ? callback(data.err) :  alert(url+":删除出错");
                     }
                 }).error(function(){
                     alert(url+":连接出错");
                 })
         };
-
         this.$update = function(pojo,callback){
+            if(callback == false){
+                return updateLocalPojo.call(this,pojo);//更新本地对象
+            }
+
             var _this = this;
             var url = _this._server_url+'Update';
             $http.post(url,{updatePojo:pojo})
                 .success(function(data){
-                    if(data.err){
-                        alert("url->"+url+":更新出错");
+                    if(!data.err){
+                        updateLocalPojo.call(_this,pojo);
+                        callback && callback(data.err,data.result);
+                    }else{
                         data.err && console.log(data.err);
+                        callback ? callback(data.err) :  alert(url+":更新出错");
                     }
-                    callback && callback(data.err,data.result);
                 }).error(function(){
                     alert(url+":连接出错");
                 })
-        }
+        };
 
     }]);
 

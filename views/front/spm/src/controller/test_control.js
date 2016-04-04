@@ -15,6 +15,12 @@
 
             $scope.query = {};
 
+            $scope.testLocalPojo = {
+                _id:"570144cefbb38a0211949eea",
+                name:"changeLocal3"
+            }
+
+
             $scope.subForm = function(){
                 var _id = $scope.person._id;
                 if(!_id) {

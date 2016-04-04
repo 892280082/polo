@@ -89,20 +89,11 @@ router.post('/updatePerson',function(req,res){
 //测试
 mongooseUtil.createBaseCurd('/getPersonAll',Person,function(req,res){
 	this.pagination({
-		query:req.body.query,
-		limit:req.body.limit,
-		skip:req.body.skip*req.body.limit,
-		sort:req.body.sort,
-		model:this.Model,
+		req:req,
 	},function(err,result){
 		res.json({err:err,result:result});
 	})
 },router);
-
-
-
-
-
 
 
 
