@@ -1,0 +1,30 @@
+框架名称 simple
+
+1.设计目标
+简易 健壮的 mvc框架
+
+2.知识面
+mongodb express angular node
+
+1.0 版本完成进度
+2015/4/4 - 4/7
+一
+(1).完成mongooseUtil->pagination populate多集合连查  OK
+
+二.
+(1)前台pageResult分页对象 设计成前端Dao。 可以对对象做增删改操作，还有分页及简单查询。
+添加 link方法 参数值是url,即后台的createBaseCurd路由路径。
+设置这个方法后 curd get则可以正常使用了 $pagination只用设置 query和pageSize  [OK]
+
+(2)添加$query属性 默认值是{}，$search方法中如果没有参数传递，则使用该属性进行查询 [OK]
+
+(3)添加 _contain 方法 参数Pojo对象  判断该对象是否在本地 如果是则更新  查询通过对象的_id属性。[OK]
+
+(4)添加get方法，get方法和search相似，但是get获取的是查询的对象数组，也可传入参数查询，如果没有使用
+$query属性 进行查询
+
+(5)$LoadInit改名为$pagination 这样更加清晰  [OK]
+
+(6)所有的$curPage total 之类的分页信息 放入$pageInfo中去 [否决]
+
+(7)整理代码，写好注释还有使用案例。在当前版本这个代码将不在进行任何改动，除非修复BUG。

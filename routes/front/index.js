@@ -14,13 +14,14 @@ router.get('/index',function(req,res){
 router.get('/insert',function(req,res){
 	then(function(next){
 		var person = {
+			_id:'56fd38a8becb80650a0306da',
 			name:"aa"+ _.random(1,100),
 			age: _.random(18,30),
 		}
 		person = new Person(person);
 		person.save(function(err){
+			next(err);
 		});
-		next(err);
 	}).then(function(){
 		Person.find({},function(err,docs){
 			return res.json(docs);
@@ -35,6 +36,7 @@ router.get('/insert',function(req,res){
 router.get('/insertStory',function(req,res){
 	then(function(next){
 		var story = {
+
 			_creator:"56fd38859119e3550a9212b9",
 			title:"系列丛书"+ _.random(0,10),
 			fans:["56fd38a8becb80650a0306da","56fd38a8becb80650a0306da"]
@@ -51,7 +53,7 @@ router.get('/insertStory',function(req,res){
 })
 
 router.get('/findAll',function(req,res){
-	Story.findOne({}).populate('_creator').populate('fans').exec(function(err,docs){
+	Story.find({}).populate('_creator fans').exec(function(err,docs){
 		res.json(docs);
 	})
 })
@@ -86,7 +88,7 @@ router.post('/updatePerson',function(req,res){
 	})
 });
 
-//测试
+//测试 wait--->population需要设置
 mongooseUtil.createBaseCurd('/getPersonAll',Person,function(req,res){
 	this.pagination({
 		req:req,

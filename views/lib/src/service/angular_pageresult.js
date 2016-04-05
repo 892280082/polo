@@ -47,63 +47,54 @@ function deepCopy(source) {
     return result;
 }
 
-//对象属性覆盖
-function coverObject(newPojo){
-    var oldPojo = this;
-    _.mapObject(newPojo,function(val,key){
-        oldPojo[key] = val;
-    })
-    return oldPojo;
-}
-
-function updateLocalPojo(target){
-    var array = concactArray(this._readCache,this.$array);
-    array = concactArray(array,this._nextCache);
-    var oldpojo = _.find(array,function(ele){
-        return ele._id == target._id;
-    })
-    if(oldpojo){
-        _.mapObject(target,function(val,key){
-            oldpojo[key] = val;
-        })
+function dealSearchContain (key,val) {
+    var conver = function(key,val){
+        return {key:key,val:val}
     }
+
+    key = key.replace(/-/g,".");//-转换成.
+    var conditions = ['$$_','$gt_','$gte_','$lt_','$lte_'];
+
+    var delKey = _.find(conditions,function(ele){
+        return key.indexOf(ele) >= 0
+    })
+
+    if(delKey == undefined)
+        return conver(key,val);
+
+    if(delKey === '$$_')
+        return conver(key.replace(delKey,''),{$regex: val ,$options: 'i'});
+
+    var tempVal = {};
+    tempVal[delKey.replace('_','')] = val;
+    return conver(key.replace(delKey,''),tempVal);
 }
 
-
-//处理query  $$_ 模糊查询
+//处理query
 function dealQuery(query){
-    var query = deepCopy(query);
+    var tempQuery = {};
     for(var p in query){
-
         //删除属性
         if(query[p] === ''
             || typeof query[p] === 'undefined'
             || (_.isObject(query[p]) &&  _.keys(query[p]).length <= 0)) {
-
-            delete  query[p];
             continue;
         }
-        //处理模糊查询
-        if(p.indexOf("$$_") === 0){
-            var tempParam = query[p];
-            delete query[p];
-            p = p.substring(3,p.length);
-            query[p] = {$regex: tempParam ,$options: 'i'};
+
+        var result = dealSearchContain(p,query[p]);
+
+        if(_.has(tempQuery,result.key)){ //属性重复 则将val添加入原先的val中
+            var oldVal = tempQuery[result.key];
+            _.mapObject(result.val,function(val,key){
+                oldVal[key] = val;
+            })
+            continue;
         }
 
-        //大于
-        //小于
-
-        //将中间的$换成. 方便对象深入查询 {}
-        if(p.indexOf("$") > 0){
-            var tempParam = query[p];
-            delete query[p];
-            p = p.replace("$",".");
-            query[p] = tempParam;
-        }
-
+        tempQuery[result.key] = result.val;
     }
-    return query;
+
+    return tempQuery;
 }
 
 angular.module("service_pageResult",[])
@@ -113,11 +104,13 @@ angular.module("service_pageResult",[])
         this._readCache = [];//读过数据的缓存
         this._nextCache = [];//未读数据的缓存
         this._server_url ="";
-        this._server_pojo = {
+        this.$query = {};//search和get的查询对象
+        this._server_pojo = { //发送给后台分页的对象
             query:{},
             skip:0,
             limit:10,
             sort:null,
+            populate:'',
         };
         this.$pageSize = this._server_pojo.limit;//页面显示数据条数
         this.$totalSize = 0;//总数
@@ -175,35 +168,44 @@ angular.module("service_pageResult",[])
                 })
             }
         };
-        this.$loadInit = function(param,callback){
-            if(param.waterfull)
-                this.$waterfull = param.waterfull;
-            if(param.pass)
-                this.$pass = param.pass;
-            if(param.query)
-                this._server_pojo.query = param.query;
-            if(param.pageSize)
-                this.$pageSize = this._server_pojo.limit = param.pageSize;
-            if(param.sort)
-                this._server_pojo.sort = param.sort;
-            if(param.skip)
-                this._server_pojo.skip = param.skip;
-            this._server_url = param.url;
+        this.$link = function(url){
+            this._server_url = url;
+        };
+        this.$pagination = function(param,callback){
+            this.$waterfull = param.waterfull || this.$waterfull;
+
+            this.$pass = param.pass || this.$pass;
+
+            this._server_pojo.query = param.query || this._server_pojo.query;
+
+            this._server_pojo.limit = this.$pageSize =  param.pageSize || this.$pageSize;
+
+            this._server_pojo.sort = param.sort || this._server_pojo.sort;
+
+            this._server_pojo.skip = param.skip || this._server_pojo.skip;
+
+            this._server_pojo.populate = param.populate || this._server_pojo.populate;
+
+            this._server_url = param.url || this._server_url;
+
             var _this = this;
+
             $http.post(this._server_url,{
                 query:this._server_pojo.query,
                 skip:this._server_pojo.skip,
                 limit:this._server_pojo.limit*this.$pass,
                 sort:this._server_pojo.sort,
+
             }).success(function(data){
                     data.err && console.log(data.err);
-                    _this.$dataInit(data);
+                    _this._paginationInit(data);
                     callback(data.err,_this);
                 }).error(function(data){
                     callback('与后台请求错误');
             })
         };
         this.$search = function(query,sort,antherSort){
+            query = query || this.$query;
 
             query ? query = dealQuery(query)
                   : query = {};
@@ -226,13 +228,13 @@ angular.module("service_pageResult",[])
                 sort:sort,
             }).success(function(data){
                 data.err && console.log(data.err);
-                _this.$dataInit(data);
+                _this._paginationInit(data);
             }).error(function(data){
                 callback('与后台请求错误');
             })
         };
 
-        this.$dataInit = function(data){
+        this._paginationInit = function(data){ //分页初始化数据
             this.$curPage = 1;
             this._server_pojo.skip+=1;
             this._nextCache = data.result.docs;
@@ -273,7 +275,6 @@ angular.module("service_pageResult",[])
                     alert("saveUrl:连接出错");
                 })
         };
-
         this._remove = function(pojo){//删除本地数组中的元素
             removeArray(this.$array,pojo);
             if(this._nextCache.length>1){
@@ -300,9 +301,22 @@ angular.module("service_pageResult",[])
                     alert(url+":连接出错");
                 })
         };
+        this.$updateLocalPojo = function(target){ //更新本地对象 返回是否更新成功
+            var array = concactArray(this._readCache,this.$array);
+            array = concactArray(array,this._nextCache);
+            var oldpojo = _.find(array,function(ele){
+                return ele._id == target._id;
+            })
+            if(oldpojo){
+                _.mapObject(target,function(val,key){
+                    oldpojo[key] = val;
+                })
+            }
+            return !!oldpojo;
+        };
         this.$update = function(pojo,callback){
             if(callback == false){
-                return updateLocalPojo.call(this,pojo);//更新本地对象
+                return this.$updateLocalPojo(pojo);//更新本地对象
             }
 
             var _this = this;
@@ -310,7 +324,7 @@ angular.module("service_pageResult",[])
             $http.post(url,{updatePojo:pojo})
                 .success(function(data){
                     if(!data.err){
-                        updateLocalPojo.call(_this,pojo);
+                        _this.$updateLocalPojo(pojo);
                         callback && callback(data.err,data.result);
                     }else{
                         data.err && console.log(data.err);
@@ -320,6 +334,18 @@ angular.module("service_pageResult",[])
                     alert(url+":连接出错");
                 })
         };
+        this.$get = function(query,callback){
+            $http.post(this._server_url,{
+                query:query || this.$query,
+                limit:9999,
+                skip:0,
+            }).success(function(data){
+                data.err && console.log(data.err);
+                callback(data.err,data.result.docs)
+            }).error(function(data){
+                callback('与后台请求错误');
+            })
+        }
 
     }]);
 

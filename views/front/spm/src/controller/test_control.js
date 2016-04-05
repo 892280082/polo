@@ -46,17 +46,55 @@
             }
 
 
-            pageResult.$loadInit({
-                url:"/front/getPersonAll",
-                pageSize:5,
-                sort:{"_id":-1}
-            },function(err,result){
-                $scope.persons = result;
-            })
+            //pageResult.$pagination({
+            //    url:"/front/getPersonAll",
+            //    pageSize:5,
+            //    sort:{"_id":-1}
+            //},function(err,result){
+            //    $scope.persons = result;
+            //})
 
-            $scope.search = function(){
-                $scope.persons.$search($scope.query);
-            }
+
+            pageResult.$link('/front/getPersonAll');
+
+
+
+            setTimeout(function(){
+                pageResult.$update({"_id":"5703d85250de6b4c0d1d1ee0",name: _.random(100,1000)+'ss'},function(err,info){
+                    console.log("更新");
+
+                    console.log(err,info);
+                })
+            },1000)
+
+            setTimeout(function(){
+                pageResult.$save({name: _.random(100,1000)+'ss'},function(err,info){
+                    console.log("增加");
+
+                    console.log(err,info);
+                })
+            },3000)
+
+            setTimeout(function(){
+                pageResult.$remove({"_id":"5703d85250de6b4c0d1d1ee0",name: _.random(100,1000)+'ss'},function(err,info){
+                    console.log("删除");
+
+                    console.log(err,info);
+                })
+            },5000)
+
+
+
+
+
+            setTimeout(function(){
+                pageResult.$get({},function(err,docs){
+                    console.log(err,docs);
+                })
+            },7000)
+
+
+
 
         }])
 

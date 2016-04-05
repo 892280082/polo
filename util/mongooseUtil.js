@@ -299,6 +299,7 @@ exports.pagination = function(params,callback){
     var condition = params.query || body.query || {},
         skip = params.skip || body.skip || 0,
         limit = params.limit || body.body || 20,
+        populate = params.populate || body.populate || '',
         sort = params.sort || body.sort ||  {'_id':-1};
 
     var query = model.find({});
@@ -309,6 +310,9 @@ exports.pagination = function(params,callback){
     query.skip(skip);
     query.limit(limit);
     query.sort(sort);
+    if(populate)
+        query.populate(populate);
+
 
     then(function(next){
         query.exec(function (err, docs) {

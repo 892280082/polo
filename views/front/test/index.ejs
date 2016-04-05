@@ -18,9 +18,9 @@
     </tr>
 </table>
 <h1>信息列表</h1>
-姓名: <input type="text" ng-model="query.$$_name"/>
-年龄: <input type="text" ng-model="query.$gt_age"/><input type="text" ng-model="query.$gg_age"/>
-<button ng-click="search()">查询</button>
+姓名: <input type="text" ng-model="persons.$query.$$_name"/>
+年龄: <input type="text" ng-model="persons.$query.$gte_age"/><input type="text" ng-model="persons.$query.$lte_age"/>
+<button ng-click="persons.$search()">查询</button>
 <hr/>
 <table width="400px" style="text-align: center;">
     <tr>
