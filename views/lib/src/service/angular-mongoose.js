@@ -1,14 +1,42 @@
-/**
- * @desc 前端分页插件  后续会增加和后端互通实现 前段+后端分页
- * @author yq
- * @date 2016/3/2
- */
-/**
- * @param array {Array} 数组
- * @param obj {Object} 删除对象
- */
+/*
+* @desc 前端Model，封装了数据查询和增删改，异步缓存分页，复杂查询。
+*
+* @API
+* 1.$init   设置后端汇聚接口,并且返回一个前端mongoose实例
+* 2.$pagin   简单分页 -call(err,'分页对象')
+* 3.$pagination 复杂参数分页.$pagin的升级版
+* #使用增删改必须使用前三个方法中的一个 因为需要配置后端接口
+* #增删改参数重写特性一致 如果第二个参数为false表示本地操作，如果类型为Function表示回调
+* 3.$remove 根绝_id删除该对象
+* 4.$update 根绝_id更新对象
+* 5.$save   保存该对象
+* 6.$saveOrUpdate 根绝对象是否具有_id属性来判断该对象进行保存或者更新操作
+* 7.$seach 查询方法，查询后本地视图更新
+* 8.$query 本地查询对象，如果$search没有设置查询参数则使用该对象查询
+* 9.$get 获取数据,如果不设置query对象，则利用$query对象查询 查询结果不更新本地视图
+*
+*@分页对象API
+* 1.$toNext 进入下一页
+* 2.$toLast 进入上一页
+* @分页对象PARAM
+* 1.$last {Boolean} 是否拥有上一页
+* 2.$next {Boolean} 是否拥有下一页
+* 3.$pageCount {Number} 总页数
+* 4.$curPage {Number} 当前页
+* 5.$totalSize {Number} 数据总条数
+*
+* @复杂查询API
+* 1.普通查询
+* $query.name = 'xx';
+* 2.字段嵌套查询 {school:{name:'xxx'}}  查询需要把原先的'.' 换成 '-'
+* $query.school-name = 'xxx';  嵌套$query.$$_school-name='xxxx';
+* 3.复杂查询 就是在字段前加前缀，程序会自动进行转化
+* $$_ 模糊查询
+* $gt_ 大于  $gte_ 大于等于
+* $lt_ 小于  $lte_ 小于等于
+*
+* */
 var _ = require("underscore");
-
 
 function removeArray(array,obj){
     var flag = false;
@@ -39,11 +67,15 @@ function concactArray(array1,array2){
 //对象的拷贝
 function deepCopy(source) {
     var result={};
-    for (var key in source) {
-        result[key] = typeof source[key]==='object'
-            ? deepCopy(source[key])
-            : source[key];
-    }
+    _.mapObject(source,function(val,key){
+        if(_.isArray(val))
+            return result[key] = [];
+
+        if(_.isFunction(val))
+            return result[key] = val;
+
+        result[key] =  _.isObject(val) ? deepCopy(val) :  val;
+    })
     return result;
 }
 
@@ -97,8 +129,9 @@ function dealQuery(query){
     return tempQuery;
 }
 
-angular.module("service_pageResult",[])
-    .service("pageResult",["$http"
+
+angular.module("service.mongoose",[])
+    .service("mongoose",["$http"
     ,function($http){
         this.$array = [];//显示的数据
         this._readCache = [];//读过数据的缓存
@@ -138,13 +171,20 @@ angular.module("service_pageResult",[])
         };
         this._update = function(){
             var _this = this;
+
+            //如果当前页删除完，并且还有上一页则返回到上一页
+            if(_this.$curPage > 1 && this.$array.length === 0)
+                return this.$toLast();
+
+            //计算总页数
+            this.$pageCount =  this.$totalSize/this.$pageSize;
+            if(this.$totalSize%this.$pageSize)
+                this.$pageCount = (~~this.$pageCount)+1;
+
             //判断上一页和下一页的状态
-            this.$curPage <= 1
-                ? this.$last = false
-                : this.$last = true;
-            this.$curPage >= this.$pageCount
-                ? this.$next = false
-                : this.$next = true;
+            this.$last = this.$curPage > 1;
+            this.$next = this.$curPage < this.$pageCount;
+
             //判断 this._readCache 长度大于150 则删除数组头部的pageSize单位
             //判断 this._readCache 长度小于等于pageSize 和 curPage不等于1 则请求服务器将获得的数据放入缓存头部
             //判断 this._readCache 长度大于150 则删除数组尾部的pageSize单位
@@ -168,9 +208,37 @@ angular.module("service_pageResult",[])
                 })
             }
         };
-        this.$link = function(url){
+        /**
+         * @param url {String} -后端接口
+         */
+        this.$init = function(url){
             this._server_url = url;
+            var copyPojo = deepCopy(this);
+            return copyPojo;
         };
+        /**
+         * @param query 查询对象 @param pageSize 分页大小
+         */
+        this.$pagin = function(query,pageSize,callback){
+            var self = this;
+            if(!!callback)
+            return this.$pagination({query:query,pageSize:pageSize},callback);
+
+            this.$pagination({query:query,pageSize:pageSize},function(err,_this){
+                self = _this;
+            });
+            return self;
+        }
+        /**
+         * @param param  {{ url:String,//后台接口
+         *                  pageSize:Number,//分页大小
+         *                  waterFull:Boolean?,//是否开启瀑布流
+         *                  sort:Object?,//排序
+         *                  query:Object,//查询对象
+         *                  populate:String?,//是否连查
+         *                  skip:Number?}}//跳过多少页查询
+         *
+         */
         this.$pagination = function(param,callback){
             this.$waterfull = param.waterfull || this.$waterfull;
 
@@ -204,6 +272,11 @@ angular.module("service_pageResult",[])
                     callback('与后台请求错误');
             })
         };
+        /**
+         * @param query {Object} 查询条件
+         * @param sort ｛Object｝ 第一排序
+         * @param antherSort 可有多个  一次排序的key/val 对象
+         */
         this.$search = function(query,sort,antherSort){
             query = query || this.$query;
 
@@ -239,15 +312,9 @@ angular.module("service_pageResult",[])
             this._server_pojo.skip+=1;
             this._nextCache = data.result.docs;
             this.$array = ArrayRemoveHead(this._nextCache,this.$pageSize);
-
             this.$totalSize = data.result.total;
-            this.$pageCount =  this.$totalSize/this.$pageSize;
-            if(this.$pageCount%this.$pageSize)
-                this.$pageCount = (~~this.$pageCount)+1;
-
             this._update();
         };
-
         this._save = function(pojo){
             this.$array.splice(0,0,pojo);
             this.$totalSize++;
@@ -255,6 +322,7 @@ angular.module("service_pageResult",[])
                 var _last = this.$array.pop();
                 this._nextCache.splice(0,0,_last);
             }
+            this._update();
         };
         this.$save = function(pojo,callback){
             if(callback == false)
@@ -268,7 +336,7 @@ angular.module("service_pageResult",[])
                         _this._save(data.result);
                         callback && callback(data.err,data.result);
                     }else{
-                        data.err && console.log(data.err);
+                        console.log(data.err);
                         callback ? callback(data.err) :  alert(url+":保存出错");
                     }
                 }).error(function(){
@@ -281,6 +349,7 @@ angular.module("service_pageResult",[])
                 this.$array.push(this._nextCache.splice(0,1)[0])
             }
             this.$totalSize--;
+            this._update();
         };
         this.$remove = function(pojo,callback){
             if(!pojo._id || callback == false)
@@ -294,7 +363,7 @@ angular.module("service_pageResult",[])
                         _this._remove(pojo);
                         callback && callback(data.err,data.result);
                     }else{
-                        data.err && console.log(data.err);
+                        console.log(data.err);
                         callback ? callback(data.err) :  alert(url+":删除出错");
                     }
                 }).error(function(){
@@ -327,7 +396,7 @@ angular.module("service_pageResult",[])
                         _this.$updateLocalPojo(pojo);
                         callback && callback(data.err,data.result);
                     }else{
-                        data.err && console.log(data.err);
+                        console.log(data.err);
                         callback ? callback(data.err) :  alert(url+":更新出错");
                     }
                 }).error(function(){
@@ -346,10 +415,31 @@ angular.module("service_pageResult",[])
                 callback('与后台请求错误');
             })
         }
+        this.$saveOrUpdate = function(pojo,option){
+            pojo._id ? this.$update(pojo,option)
+                     : this.$save(pojo,option);
+        };
+        this.$removeCache = function(){
+            this.$array = [];//显示的数据
+            this._readCache = [];//读过数据的缓存
+            this._nextCache = [];//未读数据的缓存
+        }
 
-    }]);
+    }]).directive('mongoosePagination', function() {
+        return {
+            restrict: 'E',
+            template:
+            '<div class="mongoosepage"> ' +
+                '<span><a  class="mongoosechange" ng-show="data.$last"  style="cursor: pointer" ng-click="data.$toLast();">上一页</a></span> ' +
+                '<span><a  class="mongoosechange" ng-show="data.$next"  style="cursor: pointer" ng-click="data.$toNext();">下一页</a></span> ' +
+                ' <span class="mongoosecurage" > <a>{{ data.$curPage }}/{{ data.$pageCount }}</a> </span> ' +
+                '<span class="mongoosetotal"><a>共:{{ data.$totalSize }}</a></span> ' +
+            '</div>',
+            scope:{
+                data:'='
+            },
+            replace: true,
+        };
+    });
 
-module.exports = {
-    service_pageResult:"service_pageResult",
-    pageResult:"pageResult"
-}
+module.exports =  "service.mongoose";
