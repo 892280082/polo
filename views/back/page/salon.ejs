@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en" ng-app="myApp">
+<head>
+    <meta charset="UTF-8">
+    <% include ../include/baseLink %>
+    <title>会所信息管理</title>
+    <script type="text/javascript" src="/back/dist/salon.js"></script>
+</head>
+<body ng-controller="salon_controller">
+<div class="rt_content">
+    <ts-cuslist ng-if="show.cuslist"></ts-cuslist>
+    <ts-cusadd ng-if="show.cusadd"></ts-cusadd>
+</div>
+<!-- 会所列表页面 -->
+<script type="text/ng-template" id="cuslist">
+    <div class="page_title">
+        <h2 class="fl">会所信息列表</h2>
+    </div>
+    <section>
+        <label>会所名称:</label>
+        <input type="text" class="textbox textbox_295"  ng-model="array_custom.$query.$$_title" />
+        <input type="button" value="查询"  ng-click="array_custom.$search();" class="group_btn"/>
+    </section>
+    <section>
+        <div class="page_title">
+            <h2 class="fl">例如产品详情标题</h2>
+            <a class="fr top_rt_btn"  ng-click="changeIntoEdit()">添加会所</a>
+        </div>
+        <table class="table">
+            <tr>
+                <th>ID</th>
+                <th>名称</th>
+                <th>地址</th>
+                <th>手机号</th>
+                <th>微信号</th>
+                <th>前台展示</th>
+                <th>权重</th>
+                <th>创建时间</th>
+                <th>操作</th>
+            </tr>
+            <tr ng-repeat="cus in array_custom.$array">
+                <td width="8%">{{ $index + 1}}</td>
+                <td width="11%"  style="cursor: pointer"  ng-click="changeIntoEdit(cus);">{{ cus.title }}</td>
+                <td width="13%" >
+                    {{ cus.address }}
+                </td>
+                <td width="13%" >
+                    {{ cus.tel }}
+                </td>
+                <td width="13%" >
+                    {{ cus.weixin }}
+                </td>
+                <td width="8%">
+                    {{ cus.state ? '是' : '否' }}
+                </td>
+                <td width="10%" >{{ cus.sort }}</td>
+                <td width="12%" >{{ cus.creatTime | date:'yyyy-MM-dd' }}</td>
+                <td>
+                    <a class="inner_btn"  ng-click="removeCustom(cus);"  href="#">删除</a>
+                </td>
+            </tr>
+        </table>
+        <mongoose-pagination data="array_custom"></mongoose-pagination>
+
+    </section>
+</script>
+<!-- 会所添加编辑页面-->
+<script type="text/ng-template" id="cusadd" >
+    <div class="page_title top1">
+        <h2 class="fl">{{ pojo_custo._id ? '会所编辑' : '会所添加' }}</h2>
+        <a class="fr top_rt_btn" ng-click="toPageList();" >返回</a>
+    </div>
+    <div>
+        <h2 class="fl" ng-if="pojo_custo._id">会所数据编辑</h2>
+    </div>
+    <section>
+        <form
+                name="subForm"
+                >
+            <table class="datatable">
+                <tr>
+                    <td colspan="6" style="text-align: left;" class="tle1">会所基本信息</td>
+                </tr>
+                <tr>
+                    <td class="tname"><label>会所名:</label></td>
+                    <td class="tiput" style="width: 200px;">
+                        <input type="text"  ng-model="pojo_custom.title"  name="t_title"
+                               class="textbox" required placeholder="请输入会所名" />
+                    </td>
+                    <td class="tip" ></td>
+                    <td class="tname"><label>会所地址:</label></td>
+                    <td class="tiput" style="width: 200px;">
+                        <input type="text"  ng-model="pojo_custom.address"  name="t_title"
+                               class="textbox" required placeholder="请输入联系方式" />
+                    </td>
+                    <td class="tip" ></td>
+                </tr>
+                <tr>
+                    <td class="tname"><label>联系电话:</label></td>
+                    <td class="tiput" style="width: 200px;">
+                        <input type="text"  ng-model="pojo_custom.tel"  name="t_title"
+                               class="textbox" required placeholder="请输入联系方式" />
+                    </td>
+                    <td class="tip" ></td>
+                    <td class="tname"><label>微信:</label></td>
+                    <td class="tiput">
+                        <input type="text"  ng-model="pojo_custom.weixin"  name="t_title"
+                               class="textbox" required placeholder="请输入微信" />
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="tname"><label>前台展示:</label></td>
+                    <td class="tiput">
+                        <input type="checkbox"
+                               style="width: 20px;"
+                               ng-true-value="1"
+                               ng-false-value="0"
+                               ng-model="pojo_custom.state" />
+                    </td>
+                    <td></td>
+                    <td class="tname"><label>首页排序:</label></td>
+                    <td class="tiput">
+                        <input type="text"  ng-model="pojo_custom.sort"  name="t_title"
+                               class="textbox" required placeholder="数值越大越靠前" />
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td colspan="1"><label>会所简介:</label></td>
+                    <td colspan="5"><textarea class="textarea"
+                                              style="width:635px;height:100px;"
+                                              ng-maxlength="100"
+                                              ng-model="pojo_custom.content"
+                                              name="t_introduce"  required>
+                                </textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="tname"><label>封面图(284*240):</label></td>
+                    <td colspan="5">
+                        <input type="file"
+                               nv-file-select=""
+                               uploader="uploader"
+                               name="t_imgUrl" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align: center;">
+                        <img style="width: 80%;" src="{{ pojo_custom.imgUrl}}" alt="封面图"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="text-align: center;">
+                        <input class="link_btn"  type="button" ng-click="saveOrUpdate();" value="提交" /></td>
+                    <td colspan="3" style="text-align: center;">
+                        <input class="link_btn" type="button"  ng-click="toPageList();"  value="取消" /></td>
+                </tr>
+            </table>
+        </form>
+    </section>
+</script>
+<script>
+    $(document).ready(function(){
+        //弹出关键字
+        $("#alertKeyPage").click(function(){
+            $("#pageKey").fadeIn();
+        });
+        $(".falseBtn").click(function(){
+            $("#pageKey").fadeOut();
+        });
+    });
+</script>
+<section id="pageKey" class="pop_bg ttty"  >
+    <div class="pop_cont">
+        <div class="">
+            <h3>关键字管理<input style="float: right;"  type="button" value="关闭"  class="input_btn falseBtn"/></h3>
+        </div>
+        <select  ng-model="articleKey"
+                 ng-options="m  for m in  _.difference(webConfig.activeKeys,pojo_custom.keyword)">
+            <option value="">-- 请选择 --</option>
+        </select>
+        <input type="button" value="添加" ng-if="articleKey"
+               ng-click="pojo_custom.keyword.push(articleKey);" />
+        <br/>
+        <table style="text-align: center;">
+            <tr>
+                <td width="20%">序号</td>
+                <td width="60%">关键字</td>
+                <td width="20%">操作</td>
+            </tr>
+            <tr ng-repeat="key in pojo_custom.keyword">
+                <td>{{ $index }}</td>
+                <td>{{ key }}</td>
+                <td><input type="button"  ng-click="pojo_custom.keyword.remove(key);" value="删除"/> </td>
+            </tr>
+        </table>
+    </div>
+</section>
+
+</body>
+</html>
