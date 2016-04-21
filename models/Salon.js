@@ -12,6 +12,7 @@ var salonSchema = new Schema({
     title:String,
     imgUrl:String,
     weixin:String,
+    qq:String,
     tel:String,
     content:String,
     address:String,

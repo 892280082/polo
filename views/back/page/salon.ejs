@@ -30,7 +30,7 @@
             <tr>
                 <th>ID</th>
                 <th>名称</th>
-                <th>地址</th>
+                <th>QQ</th>
                 <th>手机号</th>
                 <th>微信号</th>
                 <th>前台展示</th>
@@ -42,7 +42,7 @@
                 <td width="8%">{{ $index + 1}}</td>
                 <td width="11%"  style="cursor: pointer"  ng-click="changeIntoEdit(cus);">{{ cus.title }}</td>
                 <td width="13%" >
-                    {{ cus.address }}
+                    {{ cus.qq }}
                 </td>
                 <td width="13%" >
                     {{ cus.tel }}
@@ -92,6 +92,18 @@
                     <td class="tiput" style="width: 200px;">
                         <input type="text"  ng-model="pojo_custom.address"  name="t_title"
                                class="textbox" required placeholder="请输入联系方式" />
+                    </td>
+                    <td class="tip" ></td>
+                </tr>
+                <tr>
+                    <td class="tname"><label>QQ:</label></td>
+                    <td class="tiput" style="width: 200px;">
+                        <input type="text"  ng-model="pojo_custom.qq"  name="t_title"
+                               class="textbox" required placeholder="请输入qq" />
+                    </td>
+                    <td class="tip" ></td>
+                    <td class="tname"><label></label></td>
+                    <td class="tiput" style="width: 200px;">
                     </td>
                     <td class="tip" ></td>
                 </tr>
