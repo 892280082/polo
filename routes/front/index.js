@@ -8,17 +8,17 @@ var Config = require("../../models/Config.js");
 var Salon = require("../../models/Salon.js");
 
 
-router.use("*",(req,res,next)=>{
-	var deviceAgent = req.headers['user-agent'].toLowerCase();
-	console.log(deviceAgent);
-	var agentId = deviceAgent.match(/(iphone|ipod|ipad|android)/);
-	console.log("agentId",agentId);
-	if(agentId){
-		next();
-	}else{
-		return false;
-	}
-});
+// router.use("*",(req,res,next)=>{
+// 	var deviceAgent = req.headers['user-agent'].toLowerCase();
+// 	console.log(deviceAgent);
+// 	var agentId = deviceAgent.match(/(iphone|ipod|ipad|android)/);
+// 	console.log("agentId",agentId);
+// 	if(agentId){
+// 		next();
+// 	}else{
+// 		return false;
+// 	}
+// });
 
 //会所列表页面
 router.get('/toSalonList',function(req,res){
