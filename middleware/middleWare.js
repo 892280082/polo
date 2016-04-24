@@ -1,6 +1,9 @@
-var ueditor = require("ueditor"),
-    multer = require ( 'multer'),
-    captchapng = require('captchapng');
+var ueditor = require("ueditor");
+var multer = require ( 'multer');
+var captchapng = require('captchapng');
+var path = require('path');
+var fs = require('fs');
+var appConfig = require("../conf/app_config");
 
 module.exports = function(app){
     //配置上传multer插件
@@ -58,21 +61,40 @@ module.exports = function(app){
     //处理ueditor下载请求
     app.use(app.get('upload_file')+'/images/ueditor*',function(req,res){
         res.download(req.baseUrl);
-    })
+    });
 
     //处理通用下载请求
     app.use('/download/*',function(req,res){
        var  directURl = app.get("upload_file")+req.baseUrl.replace("download", "");
         res.download(directURl);
-    })
+    });
 
-    //加载路由文件
-    var configRoute = app.get('configRoute');
-    for(var p in configRoute){
-        p === "/" ?
-        app.use(p,require("../routes/"+configRoute[p])):
-        app.use("/" + p, require("../routes/" + configRoute[p]));
-    }
+    
+    app.get("/downFileName",function(req,res){
+        var fileUrl = req.query.fileurl;
+        var filename = req.query.filename;
+        var directURl = path.join(appConfig.main.uploadDir,fileUrl.replace("download", ""));
+
+        var userAgent = (req.headers['user-agent']||'').toLowerCase();
+
+        if(userAgent.indexOf('msie') >= 0 || userAgent.indexOf('chrome') >= 0) {
+            res.setHeader('Content-Disposition', 'attachment; filename=' + encodeURIComponent(filename));
+        } else if(userAgent.indexOf('firefox') >= 0) {
+            res.setHeader('Content-Disposition', 'attachment; filename*="utf8\'\'' + encodeURIComponent(filename)+'"');
+        } else {
+            /* safari等其他非主流浏览器只能自求多福了 */
+            res.setHeader('Content-Disposition', 'attachment; filename=' + new Buffer(filename).toString('binary'));
+        }
+        res.setHeader('Content-type', path.extname(filename));
+
+        var filestream = fs.createReadStream(directURl);
+        filestream.on('data', function(chunk) {
+            res.write(chunk);
+        });
+        filestream.on('end', function() {
+            res.end();
+        });
+    });
 
     //配置ueditor编辑器后台
     app.use("/plugin/ueditor/ueditor", ueditor("", function(req, res, next) {
@@ -97,13 +119,23 @@ module.exports = function(app){
         }
     }));
 
+
+
+    //加载路由文件
+    var configRoute = app.get('configRoute');
+    for(var p in configRoute){
+        p === "/" ?
+        app.use(p,require("../routes/"+configRoute[p])):
+        app.use("/" + p, require("../routes/" + configRoute[p]));
+    }
+
     /**
      * @desc 开发模式下报将错误信息渲染到500.html页面
      *       配置404提示页面
      **/
     app.use(function(req,res){
         res.render(app.get('404page'));
-    })
+    });
 
     app.use(function(err, req, res,next) {
         console.error(err.stack);

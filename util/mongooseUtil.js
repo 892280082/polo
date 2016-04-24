@@ -15,11 +15,12 @@ var objectid = require("objectid"),
  * 6.removeSingleById -通过ID删除单个POJO
  * 7.updateSingleById -通过ID更新单个POJO
  * 8.pagination -分页工具
- * 9.increateProtoById model一个属性的增加和减少 -call('err');
- * 10.pushInnerCollectionById 像model的内部集合推送对象 -call(err,info);
- * 11.pushInnerCollectionById 像model的内部集合删除对象 -call(err,info);
- * 12.contains 判断数组中是否有指定的object -call(Boolean)
- * 13.converIdsArray -将ObjectId数组转换成对象数组
+ * 9.increateProtoById model一个属性的增加和减少 
+ * 10.pushInnerCollectionById 像model的内部集合推送对象 
+ * 11.pushInnerCollectionById 像model的内部集合删除对象 
+ * 12.contains 判断数组中是否有指定的object
+ * 13.updateOutKey 更新外键。
+ * 14.createBaseCurd 封装基本的curd
  */
 
 
@@ -299,10 +300,11 @@ exports.pagination = function(params,callback){
     var condition = params.query || body.query || {},
         skip = params.skip || body.skip || 0,
         limit = params.limit || body.body || 20,
-        populate = params.populate || body.populate || '',
+        property = params.property || {},
+        populate = params.populate || body.populate || false,
         sort = params.sort || body.sort ||  {'_id':-1};
 
-    var query = model.find({});
+    var query = model.find({},property);
     _.mapObject(condition,function(value,key){
         query.where(key,value);
     });
@@ -310,8 +312,18 @@ exports.pagination = function(params,callback){
     query.skip(skip);
     query.limit(limit);
     query.sort(sort);
-    if(populate)
+
+
+    if(populate){
+        if(_.isArray(populate)){
+            _.each(populate,function(ele){
+                query.populate(ele);
+            });
+        }else{
+            query.populate(populate);
+        }
         query.populate(populate);
+    }
 
 
     then(function(next){
@@ -326,13 +338,13 @@ exports.pagination = function(params,callback){
                 docs:docs,
                 skip:skip,
                 limit:limit
-            })
+            });
         });
     }).fail(function(next,err){
         err && console.log(err);
         return callback('mongooseUtil ->pagination :   search Dao fail');
-    })
-}
+    });
+};
 
 /**
  * @param _id {String} -id
@@ -425,6 +437,76 @@ exports.createBaseCurd = function(url,Model,callback,router){
             return res.json({err:err,result:info});
         })
     });
+}
+
+
+/**
+ * @desc 更新外键
+ * @param property {{
+ *      subPojo:Object,
+        subDao:Object,
+        outDao:Object,
+        outKey:String,
+        innerCollet:String,
+        }} - 选项
+ * @param callback {Function} - 回调函数
+ * @example
+ *      mongooseUtil.updateOutKey({
+            subPojo:pro,
+            subDao:Product,
+            outDao:Custom,
+            outKey:'_userId',
+            innerCollet:'productions',
+        },function(err){
+            next(err);
+        });
+ *
+ */
+exports.updateOutKey = function(property,callback){
+    var subPojo = property.subPojo;
+    var subDao = property.subDao;
+    var outDao = property.outDao;
+    var outKey = property.outKey;
+    var innerCollet = property.innerCollet;
+
+    then(function(next){
+
+        subDao.findOne({"_id":subPojo._id},function(err,doc){
+            next(err,doc);
+        })
+
+    }).then(function(next,oldPro) {
+        var subId = subPojo._id;
+        var oldId = oldPro[outKey];
+        var newId = subPojo[outKey];
+        if (oldId != newId) {
+
+            then(function (defer) {
+                outDao.update({"_id": oldId}, exports.createShell('$pull', innerCollet, subId), function (err) {
+                    defer(err);
+                })
+            }).then(function (defer) {
+                outDao.update({"_id": newId}, exports.createShell('$push', innerCollet, subId), function (err) {
+                    defer(err);
+                })
+            }).then(function(defer){
+                next();
+                defer();
+            }).fail(function (defer, err) {
+                next(err);
+            })
+
+        } else {
+            return callback();
+        }
+    }).then(function(next){
+        callback();
+        next();
+    }).fail(function(next,err){
+        if(err)
+            console.log('mongooseUtil ->changeParentId :',err);
+        return callback('用户更新出错');
+    })
 }
 
 
