@@ -6,6 +6,13 @@
 var moment = require("moment");
 var _ = require("underscore");
 
+_.constructor.prototype.$formatTime = function(time){
+	return moment(time).format('yyyy-MM-dd');
+};
+
+_.constructor.prototype.$maxStr = function(str,maxSize){
+	return str.length > maxSize ? str.substring(0,maxSize)+'...' : str;
+};
 
 moment.validateTime = function(startData,overData,infos) {
 	var currentTime = new Date();

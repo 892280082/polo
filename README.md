@@ -2,7 +2,7 @@
 1.基础的curd和分页插件已经配置成功。
 
 2.接下来的任务
-1.重写app.js文件，重构代码。
+1.重写app.js文件，重构代码。//OK
 2.重构app_config 文件
 3.在app_config 文件中把路由分离出来。
 4.重构/middleware/middleware 并将此文件改为main_middleWare

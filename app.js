@@ -3,29 +3,43 @@
  * @auther yq
  * @date 2016/2/22
  */
-var express = require('express'),
-	path = require('path'),
-	logger = require('morgan'),
-	cookieParser = require('cookie-parser'),
-	bodyParser = require('body-parser'),
-	ejs = require('ejs'),
-	config = require('./conf/app_config'),
-	session = require('express-session'),
-	MongoStore = require('connect-mongo')(session),
-	mongoose = require('mongoose'),
-	router = require('./middleware/middleWare'),
-	ejsExtend = require('./util/ejsExtend'),
-	app = express();
+var express = require('express');
+var	path = require('path');
+var	logger = require('morgan');
+var	cookieParser = require('cookie-parser');
+var	bodyParser = require('body-parser');
+var	ejs = require('ejs');
+var	config = require('./conf/app_config');
+var	session = require('express-session');
+var	MongoStore = require('connect-mongo')(session);
+var	mongoose = require('mongoose');
+var	router = require('./middleware/middleWare');
+var	ejsExtend = require('./util/ejsExtend');
+var	app = express();
 
 
 //加载配置文件
-app.set("app_config",config);
+app.set("app_config",config);//app主要配置参数
+app.set("404page");//404页面路径
+app.set('500page');//500页面路径
+app.set('isWindow');//判断系统
+app.set('isLinux');
+app.set('upload_file');//上传文件夹路径
+app.set('configRoute');//路由配置
+app.set('env');//开发模式
 
 /**
  * @desc 配置开发模式和日志
  */
-config.main.model ? app.set('env','development')
-					: app.set('env','product');
+if(config.main.model){
+	app.set('env','development');
+}else{
+	app.set('env','product');
+}
+
+/**
+ * 处理日志
+ */
 app.use(logger('dev'));
 
 /**
@@ -47,13 +61,11 @@ var pathReg = new RegExp("."+viewConfig.extName);
 app.use(function(req,res,next){
 	if(pathReg.test(req.path.split("?")[0])){
 		res.redirect('/404.html');
+	}else{
+		next();
 	}
-	next();
-})
+});
 app.use(express.static(viewConfig.relativePath));
-
-
-
 
 //判断操作系统
 var system = process.platform;
@@ -65,20 +77,21 @@ if(system.indexOf('win32') >-1 || system.indexOf('win64') >-1) {
 	app.set('isLinux',true);
 }
 
-	/**
+/**
  * @desc 配置文件上传路径
  */
 function getResovlePath(){
 	var path;
-	var system = process.platform;
 	if(app.get('isWindow')){ //判断是window系统
 		path = config.main.winUploadDir;
 	}else{ //如果是Linux或者mac
 		path =  config.main.uploadDir;
-		if (path.indexOf('/') != 0)
+		if (path.indexOf('/') !== 0){
 			path = path.join(__dirname, path);
+		}
 	}
-	config.main.debug && console.log("文件上传地址:"+path);
+	if(config.main.debug)
+		console.log("文件上传地址:"+path);
 	return path;
 }
 app.set('upload_file',getResovlePath());
@@ -94,28 +107,30 @@ app.use(cookieParser());//解析cookie
  * @desc 配置数据库和session
  */
 if(config.mongodb.open) {
+	var dataOpenDebug  = (err)=>{
+		if(err){
+			console.log("数据库连接错误:",err);
+		}
+		if (config.main.debug && !err) {
+			console.log("mongoose:数据库连接成功");
+		}
+	};
 	var mongoUrl = 'mongodb://' + config.mongodb.host + ":" +
 		(config.mongodb.port || 27017) + "/" + config.mongodb.db;
 	config.main.debug && console.log("数据库连接地址: " + mongoUrl);
 	var  mongooseDb = mongoose.connect(mongoUrl);
 	mongooseDb.connection.on('open', function (err) {
-		err && console.log(err);
-		if (config.main.debug && !err) {
-			console.log("mongoose:数据库连接成功");
-		}
-	})
+		dataOpenDebug(err);
+	});
 	mongooseDb.connection.on('error', function (err) {
-		err && console.log(err);
-		if (config.main.debug && err) {
-			console.log("mongoose:数据库连接错误");
-		}
-	})
+		dataOpenDebug(err);
+	});
 	app.use(session({ //配置mongodb为session容器
 		resave: false,
 		saveUninitialized: true,
 		secret:config.mongodb.cookieSecret,
 		key:config.mongodb.db,
-		cookie:{ secure:false,maxAge:1000*60*60*24*30},
+		cookie:{ secure:false,maxAge:config.mongodb.sessionMaxAge},
 		store:new MongoStore({
 			db:config.mongodb.db,
 			host:config.mongodb.host,
@@ -135,8 +150,7 @@ router(app);
 var appPort = config.main.port;
 app.listen(appPort,function(err){
 	if(err){
-		console.log("express 启动失败:");
-		console.log(err);
+		console.log("express 启动失败:",err);
 	}else{
 		console.log("http 服务已启动，端口:"+appPort);
 	}

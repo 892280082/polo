@@ -5,6 +5,7 @@ var path = require('path');
 var fs = require('fs');
 var appConfig = require("../conf/app_config");
 
+
 module.exports = function(app){
     //配置上传multer插件
     var  upload = multer({
@@ -38,7 +39,7 @@ module.exports = function(app){
         var imgbase64 = new Buffer(img,'base64');
         res.set('Content-Type', 'image/png');
         res.send(imgbase64);
-    })
+    });
 
     //配置上传请求
     app.post('/upload',upload.single('fileName'),function(req,res){
@@ -124,9 +125,11 @@ module.exports = function(app){
     //加载路由文件
     var configRoute = app.get('configRoute');
     for(var p in configRoute){
-        p === "/" ?
-        app.use(p,require("../routes/"+configRoute[p])):
-        app.use("/" + p, require("../routes/" + configRoute[p]));
+        if(p === '/'){
+            app.use(p,require("../routes/"+configRoute[p]));
+        }else{
+            app.use("/" + p, require("../routes/" + configRoute[p]));
+        }
     }
 
     /**
