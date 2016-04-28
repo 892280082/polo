@@ -15,6 +15,7 @@ var	MongoStore = require('connect-mongo')(session);
 var	mongoose = require('mongoose');
 var	router = require('./middleware/middleWare');
 var	ejsExtend = require('./util/ejsExtend');
+var routerConfig = require('./conf/router_config');
 var	app = express();
 
 
@@ -141,7 +142,8 @@ if(config.mongodb.open) {
 
 //配置路由
 app.use(ejsExtend.extend); //配置EJS扩展
-app.set("configRoute",config.router);
+console.log("routerConfig",routerConfig);
+app.set("configRoute",routerConfig);
 router(app);
 
 /**

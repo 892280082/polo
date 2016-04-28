@@ -6,19 +6,8 @@ var mongooseUtil = require('../../util/mongooseUtil');
 var Comment = require("../../models/Comment.js");
 var Config = require("../../models/Config.js");
 var Salon = require("../../models/Salon.js");
+var frontMiddle = require("../../middleware/front_mw.js");
 
-
-router.use("*",(req,res,next)=>{
-	var deviceAgent = req.headers['user-agent'].toLowerCase();
-	console.log(deviceAgent);
-	var agentId = deviceAgent.match(/(iphone|ipod|ipad|android)/);
-	console.log("agentId",agentId);
-	if(agentId){
-		next();
-	}else{
-		return false;
-	}
-});
 
 //会所列表页面
 router.get('/toSalonList',function(req,res){
@@ -34,6 +23,9 @@ router.get('/toSalonCusBack',function(req,res){
     res.render("front/page/ly");
 });
 
+router.get('/toTest',frontMiddle.toTest_name,(req,res)=>{
+	res.send(res.locals.name);
+})
 
 
 module.exports = router;
