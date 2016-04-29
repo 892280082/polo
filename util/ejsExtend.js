@@ -24,7 +24,7 @@ moment.validateTime = function(startData,overData,infos) {
 		return infos[1];
 	else
 		return infos[2];
-}
+};
 
 exports.extend = function(req,res,next){
 
@@ -33,5 +33,5 @@ exports.extend = function(req,res,next){
 	res.locals.$session = req.session;
 
 	next();
-}
+};
 
