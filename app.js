@@ -15,7 +15,6 @@ var	MongoStore = require('connect-mongo')(session);
 var	mongoose = require('mongoose');
 var	router = require('./middleware/middleWare');
 var	ejsExtend = require('./util/ejsExtend');
-
 var routerConfig = require('./conf/router_config');
 var dirUtil = require('./util/dirUtil');
 var logUtil = require('./util/logUtil');
@@ -24,8 +23,8 @@ var	app = express();
 /**配置提示*/
 console.constructor.prototype.$log = function(code,err){
 	var args = Array.prototype.slice.call(arguments);
-	var code = args.shift();
-	switch(code)
+	var tempCode = args.shift();
+	switch(tempCode)
 	{
 		case 0: args.unshift("SYSTEM_LOG---->");break;
 		case 1: args.unshift("SYSTEM_WARN---->");break;
@@ -109,7 +108,7 @@ function getResovlePath(){
 	if(path){ //如果设置了path路径 则创建path文件夹目录
 		dirUtil.createPaths([path,path+'/images',path+'/file',path+'/video'],(err)=>{
 			if(err)
-				console.$log(2,"ERROR---->:上传目录设置失败");
+				console.$log(2,"上传目录设置失败");
 		});
 	}
 	if(config.main.debug)

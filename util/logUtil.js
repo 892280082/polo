@@ -26,7 +26,7 @@ function FileLogEntity(fileName){
 			content:err
 		},(err)=>{
 			if(err){
-				console.log("SYSTEM_ERROR:---->:日志保存错误");
+				console.$log(2,"日志保存错误");
 			}
 		});
 	};
@@ -39,30 +39,11 @@ var init = function(collectName){
 
 var setFileName = function(fileName){
 	if(!Log){
-		console.log("SYSTEM_ERROR---->:没有配置mongodb.logCollect的集合名,或者mongoose配置失败");
-		return;
+		return console.$log(2,"没有配置mongodb.logCollect的集合名,或者mongoose配置失败");
 	}
-
 	return new FileLogEntity(fileName);
 };
 
 setFileName.init = init;
 
 module.exports = setFileName;
-
-
-console.constructor.prototype.$log = function(code,err){
-	var args = Array.prototype.slice.call(arguments);
-	var code = args.shift();
-
-	switch(code)
-	{
-		case 0: args.unshift("SYSTEM_LOG---->");break;
-		case 1: args.unshift("SYSTEM_WARN---->");break;
-		case 2: args.unshift("SYSTEM_ERROR---->");break;
-	}
-	this.log.apply(console,args);
-};
-
-
-
