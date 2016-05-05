@@ -28,6 +28,23 @@ module.exports = function(app){
         })
     });
 
+    /**封装res.json*/
+    app.use((req,res,next)=>{
+        res.$json = function(){
+            var json = {};
+            var err = arguments[0];
+            var result = arguments[1];
+            var code = arguments[2];
+            if(err)
+                json.err = err;
+            if(result)
+                json.result = result;
+             if(code)
+                json.code = code;
+            res.json(json);
+        };
+    });
+
     //处理验证码请求
     app.get('/yanzhenma', function (req, res) {
         var ranNumber = parseInt(Math.random()*9000+1000);

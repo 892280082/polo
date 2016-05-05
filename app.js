@@ -16,8 +16,22 @@ var	mongoose = require('mongoose');
 var	router = require('./middleware/middleWare');
 var	ejsExtend = require('./util/ejsExtend');
 var routerConfig = require('./conf/router_config');
+var dirUtil = require('./util/dirUtil');
+var logUtil = require('./util/logUtil');
 var	app = express();
 
+/**配置提示*/
+console.constructor.prototype.$log = function(code,err){
+	var args = Array.prototype.slice.call(arguments);
+	var tempCode = args.shift();
+	switch(tempCode)
+	{
+		case 0: args.unshift("SYSTEM_LOG---->");break;
+		case 1: args.unshift("SYSTEM_WARN---->");break;
+		case 2: args.unshift("SYSTEM_ERROR---->");break;
+	}
+	this.log.apply(console,args);
+};
 
 //加载配置文件
 app.set("app_config",config);//app主要配置参数
@@ -56,7 +70,7 @@ if(viewConfig.engine == 'ejs'){
 	app.set('404page',viewConfig.notFoundPage);
 	app.set('500page',viewConfig.errPage);
 }else{
-	console.log("配置错误:目前仅支持ejs");
+	console.$log(2,"配置错误:目前仅支持ejs");
 }
 var pathReg = new RegExp("."+viewConfig.extName);
 app.use(function(req,res,next){
@@ -71,7 +85,7 @@ app.use(express.static(viewConfig.relativePath));
 //判断操作系统
 var system = process.platform;
 if(config.main.debug)
-	console.log('当前系统:',system);
+	console.$log(0,'当前系统:',system);
 if(system.indexOf('win32') >-1 || system.indexOf('win64') >-1) {
 	app.set('isWindow',true);
 }else{
@@ -91,8 +105,14 @@ function getResovlePath(){
 			path = path.join(__dirname, path);
 		}
 	}
+	if(path){ //如果设置了path路径 则创建path文件夹目录
+		dirUtil.createPaths([path,path+'/images',path+'/file',path+'/video'],(err)=>{
+			if(err)
+				console.$log(2,"上传目录设置失败");
+		});
+	}
 	if(config.main.debug)
-		console.log("文件上传地址:"+path);
+		console.$log(0,"文件上传地址:"+path);
 	return path;
 }
 app.set('upload_file',getResovlePath());
@@ -110,15 +130,24 @@ app.use(cookieParser());//解析cookie
 if(config.mongodb.open) {
 	var dataOpenDebug  = (err)=>{
 		if(err){
-			console.log("数据库连接错误:",err);
+			console.$log(2,"数据库连接错误:",err);
+		}else{
+			var logCollect = config.mongodb.logCollect;
+			if(logCollect){
+				logUtil.init(logCollect);
+			}
+			if (config.main.debug) {
+				console.$log(0,"mongoose:数据库连接成功");
+			}
 		}
-		if (config.main.debug && !err) {
-			console.log("mongoose:数据库连接成功");
-		}
+
 	};
 	var mongoUrl = 'mongodb://' + config.mongodb.host + ":" +
 		(config.mongodb.port || 27017) + "/" + config.mongodb.db;
-	config.main.debug && console.log("数据库连接地址: " + mongoUrl);
+
+	if(config.main.debug)
+		console.log(0,"数据库连接地址: " + mongoUrl);
+
 	var  mongooseDb = mongoose.connect(mongoUrl);
 	mongooseDb.connection.on('open', function (err) {
 		dataOpenDebug(err);
@@ -142,7 +171,6 @@ if(config.mongodb.open) {
 
 //配置路由
 app.use(ejsExtend.extend); //配置EJS扩展
-console.log("routerConfig",routerConfig);
 app.set("configRoute",routerConfig);
 router(app);
 
@@ -152,9 +180,9 @@ router(app);
 var appPort = config.main.port;
 app.listen(appPort,function(err){
 	if(err){
-		console.log("express 启动失败:",err);
+		console.log(2,"express 启动失败:",err);
 	}else{
-		console.log("http 服务已启动，端口:"+appPort);
+		console.log(0,"http 服务已启动，端口:"+appPort);
 	}
 });
 
