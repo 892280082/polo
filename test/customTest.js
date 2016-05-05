@@ -13,7 +13,7 @@
     var custom = require("../models/Custom"),
         debug = require("../util/debug")("customTest"),
       Article = require("../models/Article"),
-          then= require('thenjs'),
+          then= require('yqthen'),
      objectid = require('objectid');
     var _ = require('underscore');
 

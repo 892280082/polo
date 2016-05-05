@@ -11,15 +11,21 @@ var logSchema = new Schema({
 var Log;
 
 var _consoleLog = function(fileName,api,err){
-		console.log("报错文件:"+fileName);
-		console.log("报错日志:"+api);
-		console.log("报错内容:"+err);
+	console.log('###############################################################################');
+	console.log("报错文件:"+fileName);
+	console.log("报错API:"+api);
+	console.log("报错内容:"+err);
+	console.log('###############################################################################');
 };
 
 function FileLogEntity(fileName){
 	this.fileName = fileName;
 	this.save = function(api,err){
 		_consoleLog(this.fileName,api,err);
+
+		if(!Log)
+			return;
+
 		Log.create({
 			fileName:this.fileName,
 			api:api,
@@ -38,10 +44,13 @@ var init = function(collectName){
 };
 
 var setFileName = function(fileName){
-	if(!Log){
-		return console.$log(2,"没有配置mongodb.logCollect的集合名,或者mongoose配置失败");
-	}
-	return new FileLogEntity(fileName);
+	setTimeout(()=>{
+		if(!Log){
+			return console.$log(1,"没有配置mongodb.logCollect的集合名,或者mongoose配置失败,日志将不能使用");
+		}
+	},1000);
+	var logUtil =  new FileLogEntity(fileName);
+	return logUtil;
 };
 
 setFileName.init = init;

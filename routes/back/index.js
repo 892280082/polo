@@ -1,11 +1,12 @@
 var express = require('express');
 var router = express.Router();
-var then = require('thenjs');
+var then = require('yqthen');
 var _ = require("underscore");
 var mongooseUtil = require('../../util/mongooseUtil');
 var Comment = require("../../models/Comment.js");
 var Config = require("../../models/Config.js");
 var Salon = require("../../models/Salon.js");
+var logUtil = require('../../util/logUtil')('/routes/back/index.js');
 
 
 //后台主页面
@@ -34,14 +35,8 @@ mongooseUtil.createBaseCurd('/curdSalon',Salon,function(req,res){
 		req:req,
 	},function(err,result){
 		res.json({err:err,result:result});
-	})
+	});
 },router);
-
-
-
-
-
-
 
 
 

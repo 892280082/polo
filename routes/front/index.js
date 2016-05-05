@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var then = require('thenjs');
+var then = require('yqthen');
 var _ = require("underscore");
 var mongooseUtil = require('../../util/mongooseUtil');
 var Comment = require("../../models/Comment.js");
@@ -15,7 +15,7 @@ router.get('/toSalonList',function(req,res){
         if(err)
             next(err);
         res.render("front/page/salonList",{salons:docs});
-    })
+    });
 });
 
 //会所顾客反馈页面
@@ -25,7 +25,11 @@ router.get('/toSalonCusBack',function(req,res){
 
 router.get('/toTest',frontMiddle.toTest_name,(req,res)=>{
 	res.send(res.locals.name);
-})
+});
 
+router.get('/test',(req,res)=>{
+	res.send("hello world");
+});
 
 module.exports = router;
+

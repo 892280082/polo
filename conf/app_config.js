@@ -35,6 +35,7 @@ module.exports = {
 		port:27017,//端口
 		cookieSecret:'yestart',//session加密
 		sessionMaxAge:1000*60*60*24*30,//session生命周期
+		logCollect:"polologs"
 	},
 	/**
 	 * @desc 配置渲染模板

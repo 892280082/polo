@@ -1,6 +1,6 @@
 var objectid = require("objectid"),
     _ = require('underscore'),
-    then = require("thenjs");
+    then = require("yqthen");
 /**
  * @desc mongoose 工具
  * @date 2016/2/25
