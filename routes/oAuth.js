@@ -14,9 +14,23 @@ var express = require('express'),
     qqStrategy = require('passport-qq').Strategy,
     WeiboStrategy = require('passport-weibo').Strategy;
 
+var Customer;//Cus就是你的用户集合
+
 /***
  * @desc 配置QQ第三方登陆
  */
+router.use(passport.initialize());
+
+passport.serializeUser(function(user, done) {
+    done(null, user);
+});
+
+passport.deserializeUser(function(user, done) {
+    done(null, user);
+});
+
+
+
 if(oAuthConfig.qq.open) {
     passport.use(new qqStrategy(
         {
@@ -25,9 +39,12 @@ if(oAuthConfig.qq.open) {
             callbackURL: oAuthConfig.qq.callbackURL
         },
         function (accessToken, refreshToken, profile, done) {
-            User.findOrCreate({qqId: profile.id}, function (err, user) {
-                return done(err, user);
-            });
+            var user = {
+                openId:profile.id,
+                name:profile.nickname,
+                imgurl:profile._json.figureurl_qq_2
+            };
+            done(null,user);
         }
     ));
 
@@ -37,7 +54,12 @@ if(oAuthConfig.qq.open) {
         passport.authenticate('qq', { failureRedirect: '/login' }),
         function(req, res) {
             // Successful authentication, redirect home.
-            res.redirect('/');
+
+            Customer.getUserForThird('qq',req.user,(err,doc)=>{
+                req.session.USER = doc;
+                res.render('front/loginPage/auth_login.ejs');
+            });
+
         });
 }
 
@@ -52,19 +74,25 @@ if(oAuthConfig.weibo.open){
             callbackURL:oAuthConfig.weibo.callbackURL
         },
         function(accessToken, refreshToken, profile, done) {
-            User.findOrCreate({ weiboId: profile.id }, function (err, user) {
-                return done(err, user);
-            });
+            var imgurl = profile._raw ? profile._raw.profile_image_url : '';
+            var user = {
+                openId:profile.id,
+                name:profile.displayName,
+                imgurl:imgurl
+            };
+            done(null,user);
         }
     ));
 
     router.get('/weibo',passport.authenticate('weibo'));
-
     router.get('/weibo/callback',
         passport.authenticate('weibo', { failureRedirect: '/login' }),
         function(req, res) {
             // Successful authentication, redirect home.
-            res.redirect('/');
+            Customer.getUserForThird('weibo',req.user,(err,doc)=>{
+                req.session.USER = doc;
+                res.render('front/loginPage/auth_login.ejs');
+            });
         });
 
 }

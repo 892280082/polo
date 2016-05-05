@@ -22,6 +22,9 @@ var	app = express();
 
 /**配置提示*/
 console.constructor.prototype.$log = function(code,err){
+	if(!config.main.debug)
+		return;
+
 	var args = Array.prototype.slice.call(arguments);
 	var tempCode = args.shift();
 	switch(tempCode)
@@ -84,8 +87,8 @@ app.use(express.static(viewConfig.relativePath));
 
 //判断操作系统
 var system = process.platform;
-if(config.main.debug)
-	console.$log(0,'当前系统:',system);
+console.$log(0,'当前系统:',system);
+
 if(system.indexOf('win32') >-1 || system.indexOf('win64') >-1) {
 	app.set('isWindow',true);
 }else{
@@ -111,8 +114,8 @@ function getResovlePath(){
 				console.$log(2,"上传目录设置失败");
 		});
 	}
-	if(config.main.debug)
-		console.$log(0,"文件上传地址:"+path);
+	
+	console.$log(0,"文件上传地址:"+path);
 	return path;
 }
 app.set('upload_file',getResovlePath());
@@ -136,17 +139,14 @@ if(config.mongodb.open) {
 			if(logCollect){
 				logUtil.init(logCollect);
 			}
-			if (config.main.debug) {
-				console.$log(0,"mongoose:数据库连接成功");
-			}
+			console.$log(0,"mongoose:数据库连接成功");
 		}
 
 	};
 	var mongoUrl = 'mongodb://' + config.mongodb.host + ":" +
 		(config.mongodb.port || 27017) + "/" + config.mongodb.db;
 
-	if(config.main.debug)
-		console.log(0,"数据库连接地址: " + mongoUrl);
+	console.$log(0,"数据库连接地址: " + mongoUrl);
 
 	var  mongooseDb = mongoose.connect(mongoUrl);
 	mongooseDb.connection.on('open', function (err) {
@@ -180,9 +180,9 @@ router(app);
 var appPort = config.main.port;
 app.listen(appPort,function(err){
 	if(err){
-		console.log(2,"express 启动失败:",err);
+		console.$log(2,"express 启动失败:",err);
 	}else{
-		console.log(0,"http 服务已启动，端口:"+appPort);
+		console.$log(0,"http 服务已启动，端口:"+appPort);
 	}
 });
 
