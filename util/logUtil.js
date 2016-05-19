@@ -56,3 +56,4 @@ var setFileName = function(fileName){
 setFileName.init = init;
 
 module.exports = setFileName;
+

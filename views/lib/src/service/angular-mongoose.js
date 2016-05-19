@@ -205,7 +205,7 @@ angular.module("service_mongoose",[])
                             _this._nextCache = concactArray(_this._nextCache,data.result.docs);
                         }).error(function(data){
                             console.log('与后台请求错误');
-                        })
+                        });
                 }
             };
             /**

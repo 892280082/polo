@@ -8,7 +8,6 @@ var Config = require("../../models/Config.js");
 var Salon = require("../../models/Salon.js");
 var logUtil = require('../../util/logUtil')('/routes/back/index.js');
 
-
 //后台主页面
 router.get('/main',function(req,res){
 	res.render("back/main/index");

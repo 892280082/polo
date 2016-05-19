@@ -146,6 +146,7 @@ if(config.mongodb.open) {
 	var mongoUrl = 'mongodb://' + config.mongodb.host + ":" +
 		(config.mongodb.port || 27017) + "/" + config.mongodb.db;
 
+
 	console.$log(0,"数据库连接地址: " + mongoUrl);
 
 	var  mongooseDb = mongoose.connect(mongoUrl);

@@ -7,6 +7,7 @@ var Comment = require("../../models/Comment.js");
 var Config = require("../../models/Config.js");
 var Salon = require("../../models/Salon.js");
 var frontMiddle = require("../../middleware/front_mw.js");
+var Student  = require('../../models/Student');
 
 
 //会所列表页面
@@ -28,8 +29,31 @@ router.get('/toTest',frontMiddle.toTest_name,(req,res)=>{
 });
 
 router.get('/test',(req,res)=>{
-	res.send("hello world");
+	Salon.find({},(err,docs)=>{
+		res.json({err:err,result:docs});		
+	});
 });
+
+router.get('/addStu',(req,res)=>{
+	var student = {
+		name:"张三"+_.random(10,100),
+		age:_.random(10,100),
+	};
+
+	Student.create(student,(err)=>{
+		res.json({err:err});
+	});
+
+
+
+});
+
+router.get('/stuList',(req,res)=>{
+	Student.find({name:'张三'},(err,docs)=>{
+		res.json({result:docs});
+	});
+});
+
 
 module.exports = router;
 

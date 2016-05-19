@@ -1,67 +1,86 @@
 {
-  "name": "angular",
-  "version": "1.5.0",
+  "_args": [
+    [
+      "angular",
+      "D:\\work\\polo\\views\\plugin"
+    ]
+  ],
+  "_from": "angular@latest",
+  "_id": "angular@1.5.5",
+  "_inCache": true,
+  "_installable": true,
+  "_location": "/angular",
+  "_nodeVersion": "4.4.3",
+  "_npmOperationalInternal": {
+    "host": "packages-16-east.internal.npmjs.com",
+    "tmp": "tmp/angular-1.5.5.tgz_1460972850073_0.7311463879887015"
+  },
+  "_npmUser": {
+    "email": "angular-core+npm@google.com",
+    "name": "angularcore"
+  },
+  "_npmVersion": "2.15.1",
+  "_phantomChildren": {},
+  "_requested": {
+    "name": "angular",
+    "raw": "angular",
+    "rawSpec": "",
+    "scope": null,
+    "spec": "latest",
+    "type": "tag"
+  },
+  "_requiredBy": [
+    "#USER"
+  ],
+  "_resolved": "https://registry.npmjs.org/angular/-/angular-1.5.5.tgz",
+  "_shasum": "678fdfd1c9c47368dd202c7fc8bb3bd4dba17c18",
+  "_shrinkwrap": null,
+  "_spec": "angular",
+  "_where": "D:\\work\\polo\\views\\plugin",
+  "author": {
+    "email": "angular-core+npm@google.com",
+    "name": "Angular Core Team"
+  },
+  "bugs": {
+    "url": "https://github.com/angular/angular.js/issues"
+  },
+  "dependencies": {},
   "description": "HTML enhanced for web apps",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "devDependencies": {},
+  "directories": {},
+  "dist": {
+    "shasum": "678fdfd1c9c47368dd202c7fc8bb3bd4dba17c18",
+    "tarball": "https://registry.npmjs.org/angular/-/angular-1.5.5.tgz"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/angular/angular.js.git"
-  },
+  "gitHead": "cd353693d20736baa44fb44f65f8f573ef6e8e18",
+  "homepage": "http://angularjs.org",
   "keywords": [
     "angular",
     "framework",
     "browser",
     "client-side"
   ],
-  "author": {
-    "name": "Angular Core Team",
-    "email": "angular-core+npm@google.com"
-  },
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/angular/angular.js/issues"
-  },
-  "homepage": "http://angularjs.org",
-  "gitHead": "017a583b226a335740c5b50b3e9381a52d0bb260",
-  "_id": "angular@1.5.0",
-  "_shasum": "d96ee97ab6df6cfd0915accbee484d098adb74ec",
-  "_from": "angular@latest",
-  "_npmVersion": "2.14.12",
-  "_nodeVersion": "4.2.6",
-  "_npmUser": {
-    "name": "angularcore",
-    "email": "angular-core+npm@google.com"
-  },
+  "main": "index.js",
   "maintainers": [
     {
-      "name": "angularcore",
-      "email": "angular-core+npm@google.com"
+      "email": "angular-core+npm@google.com",
+      "name": "angularcore"
     },
     {
-      "name": "bclinkinbeard",
-      "email": "ben.clinkinbeard@gmail.com"
-    },
-    {
-      "name": "petebd",
-      "email": "pete@bacondarwin.com"
+      "email": "pete@bacondarwin.com",
+      "name": "petebd"
     }
   ],
-  "dist": {
-    "shasum": "d96ee97ab6df6cfd0915accbee484d098adb74ec",
-    "size": 532930,
-    "noattachment": false,
-    "tarball": "http://registry.npm.taobao.org/angular/download/angular-1.5.0.tgz"
+  "name": "angular",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/angular/angular.js.git"
   },
-  "_npmOperationalInternal": {
-    "host": "packages-5-east.internal.npmjs.com",
-    "tmp": "tmp/angular-1.5.0.tgz_1454673705688_0.6785951922647655"
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "directories": {},
-  "publish_time": 1454673708129,
-  "_cnpm_publish_time": 1454673708129,
-  "_resolved": "https://registry.npm.taobao.org/angular/download/angular-1.5.0.tgz",
-  "readme": "ERROR: No README data found!"
+  "version": "1.5.5"
 }

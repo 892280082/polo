@@ -24,19 +24,18 @@ angular.module("controller.salon_controller",["ng.ueditor"]).
                 }else{
                     layer.msg('后台数据获取错误');
                 }
-            })
+            });
 
             $scope._ = _;
 
             $scope.changeIntoEdit = function(cus){
                 $scope.pojo_custom = cus || {};
                 $scope.show.$set('cusadd');
-            }
+            };
 
             $scope.toPageList = function(){
                 $scope.show.$set('cuslist');
-            }
-
+            };
 
 
             $scope.saveOrUpdate = function(){
@@ -48,7 +47,7 @@ angular.module("controller.salon_controller",["ng.ueditor"]).
                     }
                 });
                 $scope.toPageList();
-            }
+            };
 
             $scope.removeCustom = function(cus){
                 layer.confirm('确定删除,该操作无法恢复', {
@@ -64,7 +63,7 @@ angular.module("controller.salon_controller",["ng.ueditor"]).
                 }, function(){
 
                 });
-            }
+            };
 
             //选定状态
             $scope.validateTime = function(startData,overData,infos) {
@@ -78,8 +77,7 @@ angular.module("controller.salon_controller",["ng.ueditor"]).
                     return infos[1];
                 else
                     return infos[2];
-            }
-
+            };
 
 
             /**************************上传配置**************************/
@@ -96,5 +94,5 @@ angular.module("controller.salon_controller",["ng.ueditor"]).
             };
 
             /****************父级选定****************************/
-        }])
+        }]);
 
