@@ -299,7 +299,7 @@ exports.pagination = function(params,callback){
 
     var condition = params.query || body.query || {},
         skip = params.skip || body.skip || 0,
-        limit = params.limit || body.body || 20,
+        limit = params.limit || body.limit || 20,
         property = params.property || {},
         populate = params.populate || body.populate || false,
         sort = params.sort || body.sort ||  {'_id':-1};
@@ -322,7 +322,6 @@ exports.pagination = function(params,callback){
         }else{
             query.populate(populate);
         }
-        query.populate(populate);
     }
 
 
@@ -414,7 +413,7 @@ exports.createBaseCurd = function(url,Model,callback,router){
         return function(req,res){
             exports._save_Dao_state = currenModel;
             callback.call(exports,req,res);
-        }
+        };
     }()));
 
     //增加

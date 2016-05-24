@@ -10,6 +10,12 @@ var frontMiddle = require("../../middleware/front_mw.js");
 var Student  = require('../../models/Student');
 
 
+//mongoose 测试页面
+router.get('/mongoose',(req,res)=>{
+	res.render('angular-mongose/test/index');
+});
+
+
 //会所列表页面
 router.get('/toSalonList',function(req,res){
     Salon.find({state:1}).sort({sort:-1}).exec(function(err,docs){

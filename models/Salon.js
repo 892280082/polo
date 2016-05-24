@@ -18,7 +18,7 @@ var salonSchema = new Schema({
     address:String,
     state:{type:Number,dafault:0},// 1 展示 0 不展示
     sort:{type:Number,default:0},
-    creatTime:{type:Date,default:Date.now}
+    S:{type:Date,default:Date.now}
 });
 
 var Salon = mongoose.model('salons', salonSchema);

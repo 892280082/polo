@@ -75,7 +75,7 @@ function deepCopy(source) {
             return result[key] = val;
 
         result[key] =  _.isObject(val) ? deepCopy(val) :  val;
-    })
+    });
     return result;
 }
 

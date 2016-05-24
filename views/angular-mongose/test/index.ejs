@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp">
+<head>
+	<meta charset="UTF-8">
+	<title>测试 angular-mongoose</title>
+	<script type="text/javascript" src="../plugin/jquery/dist/jquery.js"></script>
+	<script type="text/javascript" src="../plugin/angular/angular.js"></script>
+	<script type="text/javascript" src="/angular-mongose/test/dist/index.js"></script>
+	<style>
+		ul {list-style-type: none }
+		ul li span {margin-right: 100px;width: 150px;text-align: center;}
+	</style>
+</head>
+<body ng-controller="main">
+	测试
+	<ul>
+		<li ng-repeat="salon in salonDao.$array">
+			<span>序号:{{$index  + 1}}</span>
+			<span>会所名:{{ salon.title }}</span>
+			<span>会所QQ:{{ salon.qq }}</span>
+			<span>创建日期:{{ salon.creatTime | date:'yyyy-MM-dd' }}</span>
+			<span>删除 修改</span>
+		</li>
+	</ul>
+
+	<p>
+	分页大小<input type="salonDao.$searchInfo.limit" 
+			  style="width:50px;" 
+			  value="{{ salonDao.$searchInfo.limit }}">  
+	<input type="salonDao.$searchInfo.skip"
+			  style="width:50px;"
+			  value="{{ salonDao.$searchInfo.skip }}">/{{ salonDao.$pagingInfo.allPage }}</p>
+</body>
+</html>
