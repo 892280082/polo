@@ -23,12 +23,29 @@
 		</li>
 	</ul>
 
+	<hr>
+	
+	<ul>
+		<li><a href="" ng-click="salonDao.$setCurPage(1)">1</a></li>
+		<li><a href="" ng-click="salonDao.$setCurPage(2)">2</a></li>
+		<li><a href="" ng-click="salonDao.$setCurPage(3)">3</a></li>
+		<li><a href="" ng-click="salonDao.$setCurPage(4)">4</a></li>
+		<li><a href="" ng-click="salonDao.$setCurPage(5)">5</a></li>
+		<li><a href="" ng-click="salonDao.$setCurPage(6)">6</a></li>
+	</ul>
+
+
 	<p>
-	分页大小<input type="salonDao.$searchInfo.limit" 
+	分页大小<input type="salonDao.$pagingInfo.pageSize" 
 			  style="width:50px;" 
-			  value="{{ salonDao.$searchInfo.limit }}">  
-	<input type="salonDao.$searchInfo.skip"
+			  value="{{ salonDao.$pagingInfo.pageSize }}">  
+	<input type="salonDao.$pagingInfo.curPage"
 			  style="width:50px;"
-			  value="{{ salonDao.$searchInfo.skip }}">/{{ salonDao.$pagingInfo.allPage }}</p>
+			  value="{{ salonDao.$pagingInfo.curPage }}">/{{ salonDao.$pagingInfo.allPage }}</p>
+
+	  <hr>
+	  <div ng-controller="UibPaginationController">
+	  	<uib-pagination total-items="totalItems" ng-model="currentPage" ng-change="pageChanged()"></uib-pagination>
+	  </div>
 </body>
 </html>

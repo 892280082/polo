@@ -100,11 +100,12 @@ exports.checkSetting = function(mongoose){
 exports.getData = function(mongoose,callback){
 	var $http = mongoose.$service.$http;
 	var searchInfo = mongoose.$searchInfo;
+    var pagingInfo = mongoose.$pagingInfo;
 
     var sendPojo = {
         query:searchInfo.query,
-        limit:searchInfo.limit,
-        skip:searchInfo.skip,
+        limit:pagingInfo.pageSize,
+        skip:pagingInfo.curPage -1,
         sort:searchInfo.sort,
         populate:searchInfo.populate,
     };
@@ -115,7 +116,9 @@ exports.getData = function(mongoose,callback){
 
         exports.analyDate(mongoose,data.result);//分析数据
 
-		return callback(data.err,data.result);
+        if(callback)
+	       return callback(data.err,data.result);
+       
 	}).error(function(data){
 		log(2,'后台地址链接失败：'+searchInfo.url);
 	});

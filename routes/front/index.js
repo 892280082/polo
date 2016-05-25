@@ -15,6 +15,18 @@ router.get('/mongoose',(req,res)=>{
 	res.render('angular-mongose/test/index');
 });
 
+router.get('/mongooseAdd',(req,res)=>{
+	then.each(_.range(0,20),(next,value)=>{
+		Salon.create({
+			title:'salon'+_.random(0,100),
+			qq:_.random(100000,1000000)
+		},(err)=>{
+			next(err);
+		});
+	}).done((err)=>{
+		res.json({err:"接入结束"+err});		
+	});
+});
 
 //会所列表页面
 router.get('/toSalonList',function(req,res){
