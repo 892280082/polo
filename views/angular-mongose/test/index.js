@@ -6,7 +6,7 @@ require('../src/anuglar-ui-pagin');
 *
 * Description
 */
-var app = angular.module('myApp', [mongoose,'ui.bootstrap.pagination']);
+var app = angular.module('myApp', [mongoose,'ui.bootstrap','mongoose-pagination.html']);
 
 app.controller('main', ['$scope','mongoose','$timeout'
 	, function($scope,mongoose,$timeout){
@@ -22,20 +22,37 @@ app.controller('main', ['$scope','mongoose','$timeout'
 		salonDao.$setCurPage(3);
 	}, 2000);
 
+}]);
 
-  $scope.totalItems = 64;
-  $scope.currentPage = 4;
+app.directive('mongoosePagin', ['$log', function($log){
+  return {
+    scope: {
+      ngModel:'=ngModel'
+    }, 
+    templateUrl:function(element, attrs) {return 'mongoose-pagination.html'},
+    link: function($scope, iElm, iAttrs, controller) {
 
-  $scope.setPage = function (pageNo) {
-    $scope.currentPage = pageNo;
+      $scope.$pagingInfo = $scope.ngModel.$pagingInfo;
+
+      $scope.pageChanged = function(){
+            $scope.ngModel.$setCurPage();
+      };
+
+    }
   };
+}]);
 
-  $scope.pageChanged = function() {
-    console.log('Page changed to: ' + $scope.currentPage);
-  };
-
-  $scope.maxSize = 5;
-  $scope.bigTotalItems = 175;
-  $scope.bigCurrentPage = 1;
-
+angular.module("mongoose-pagination.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("mongoose-pagination.html",
+  "<uib-pagination "+
+      "class=\"pagination-sm\""+ 
+      "boundary-links=\"true\""+
+      "max-size=\"8\""+
+      "ng-model=\"$pagingInfo.curPage\""+
+      "ng-change=\"pageChanged()\""+
+      "total-items=\"$pagingInfo.total\""+ 
+      "items-per-page=\"$pagingInfo.pageSize\""+
+      "num-pages=\"numPages\">"+
+  "</uib-pagination>"
+    );
 }]);

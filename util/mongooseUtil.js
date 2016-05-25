@@ -309,10 +309,9 @@ exports.pagination = function(params,callback){
         query.where(key,value);
     });
 
-    query.skip(skip);
+    query.skip(skip*limit);
     query.limit(limit);
     query.sort(sort);
-
 
     if(populate){
         if(_.isArray(populate)){
@@ -324,13 +323,13 @@ exports.pagination = function(params,callback){
         }
     }
 
-
     then(function(next){
         query.exec(function (err, docs) {
             next(err,docs);
         });
     }).then(function(next,docs){
         query.limit(0);
+        query.skip(0);
         query.count().exec(function(err,length){
             return callback(err,{
                 total:length,

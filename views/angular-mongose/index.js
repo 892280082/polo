@@ -14,7 +14,6 @@
  * Module dependencies.
  * @private
  */
-var _ = require('lodash');
 var util = require('./src/util');
 var Mongoose = require('./src/Mongoose');
 // var angular = require('angular');

@@ -129,6 +129,7 @@ Mongoose.prototype.exec = function(exec){
 };
 
 Mongoose.prototype.$setCurPage = function(curPage){
+	curPage = curPage || this.$pagingInfo.curPage;
 	this.skip(curPage-1);
 	this.exec(this.$callback);
 };
