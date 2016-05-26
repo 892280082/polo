@@ -21,7 +21,7 @@
 			<span>会所名:{{ salon.title }}</span>
 			<span>会所QQ:{{ salon.qq }}</span>
 			<span>创建日期:{{ salon.creatTime | date:'yyyy-MM-dd' }}</span>
-			<span>删除 修改</span>
+			<span><a ng-click="removePojo(salon)">删除</a> <a href="" ng-click="updateLason(salon)">修改</a></span>
 		</li>
 	</ul>
 
@@ -53,8 +53,12 @@
     <h4>Limit the maximum visible buttons</h4>
     <h6><code>rotate</code> defaulted to <code>true</code>:</h6>
 
+    <input type="button" value="添加" ng-click="addNewPojo()">
+    56745676jk<input type="text" ng-model="salonDao.$query.$$_qq" value="56745676jk">
+    <input type="button" value="查询" ng-click="searchPojo()">
 
-<!--     <uib-pagination
+
+<!--<uib-pagination
     	class="pagination-sm" 
     	boundary-links="true"
     	max-size="8"

@@ -6,9 +6,13 @@
  * @API
  * ------------------------------------------------
  * 1.$link					链接数据库
- * 2.$getData				获取后台数据	
- * 3.__setHttp				设置服务
- * 4.$setCurPage			跳转到指定页										
+ * 2.$getData				获取后台数据
+ * 3.__setHttp				注入http服务
+ * 4.$setCurPage			跳转到指定页
+ * 5.$save					将数据保存到数据库,刷新当前页
+ * 6.$remove				从数据库删除一条数据,刷新当前页. 如果当前页数据条数为0,则刷新上一页.
+ * 7.$update				更新一条数据到数据库,刷新当前页.
+ * 8.$search 				查询数据，页面刷新到第一页.
  * ------------------------------------------------
  */
 
@@ -52,6 +56,9 @@ module.exports = Mongoose =  function(){
 
 	//回调函数
 	this.$callback = null;
+
+	//查询对象
+	this.$query = {};
 };
 
 /**
@@ -118,9 +125,7 @@ Mongoose.prototype.waterfull = function(flag){
 	return this;
 };
 
-/**
- * @param  {Function} exec 回调函数
- */
+/** @param  {Function} exec 回调函数 */
 Mongoose.prototype.exec = function(exec){
 	if(exec)
 		this.$callback = exec;
@@ -128,8 +133,25 @@ Mongoose.prototype.exec = function(exec){
 	util.getData(this,exec);
 };
 
+/** @param  [number?] curPage 指定页数 */
 Mongoose.prototype.$setCurPage = function(curPage){
 	curPage = curPage || this.$pagingInfo.curPage;
 	this.skip(curPage-1);
 	this.exec(this.$callback);
+};
+
+Mongoose.prototype.$save = function(pojo,callback){
+	util.save(pojo,callback,this);
+};
+
+Mongoose.prototype.$remove = function(pojo,callback){
+	util.remove(pojo,callback,this);
+};
+
+Mongoose.prototype.$update = function(pojo,callback){
+	util.update(pojo,callback,this);
+};
+
+Mongoose.prototype.$search = function(){
+	this.skip(0).exec(this.$callback);
 };

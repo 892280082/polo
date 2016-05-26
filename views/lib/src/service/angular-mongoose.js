@@ -343,7 +343,7 @@ angular.module("service_mongoose",[])
                         }
                     }).error(function(){
                         alert("saveUrl:连接出错");
-                    })
+                    });
             };
             this._remove = function(pojo){//删除本地数组中的元素
                 removeArray(this.$array,pojo);

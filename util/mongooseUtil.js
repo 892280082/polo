@@ -304,6 +304,7 @@ exports.pagination = function(params,callback){
         populate = params.populate || body.populate || false,
         sort = params.sort || body.sort ||  {'_id':-1};
 
+
     var query = model.find({},property);
     _.mapObject(condition,function(value,key){
         query.where(key,value);
@@ -419,21 +420,21 @@ exports.createBaseCurd = function(url,Model,callback,router){
     router.post(saveUrl,function(req,res){
         exports.saveSingle(req.body.savePojo,Model,function(err,doc){
             return res.json({err:err,result:doc});
-        })
+        });
     });
 
     //删除
     router.post(removeUrl,function(req,res){
         exports.removeSingleById(req.body._id,Model,function(err,doc){
             return res.json({err:err,result:doc});
-        })
+        });
     });
 
     //更新
     router.post(updateUrl,function(req,res){
         exports.updateSingleById(req.body.updatePojo,Model,function(err,info){
             return res.json({err:err,result:info});
-        })
+        });
     });
 }
 
