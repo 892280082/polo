@@ -1,5 +1,4 @@
 var mongoose = require('../index');
-require('../src/anuglar-ui-pagin');
 
 /**
 *  Module
@@ -14,16 +13,23 @@ app.controller('main', ['$scope','mongoose','$timeout'
 	var salonDao;
 	$scope.salonDao = salonDao = mongoose.$link('/back/curdSalon');
 
+
 	salonDao.$getData({}).sort({creatTime:-1}).limit(5).skip(0).waterfull(false).exec((err,doc)=>{
 		console.log('doc:',doc);
+
 	});
+
+	// $scope.arrayPagin.$save(doc);
+
+	// $scope.arrayPagin = mongoose.$toArray([],6);
+
 
 	$scope.addNewPojo = ()=>{
 		salonDao.$save({title:"newasdfsdf",qq:'56745676jk'});
 	};
 
 	$scope.removePojo = (pojo)=>{
-		salonDao.$remove(pojo,(err,info)=>{
+		salonDao.$remove(pojo,(err,info)=>{x
 			console.log('remove- -->',err,info);
 		});	
 	};
@@ -38,6 +44,8 @@ app.controller('main', ['$scope','mongoose','$timeout'
 	$scope.searchPojo = function(){
 		salonDao.$search();
 	};
+
+
 
 }]);
 

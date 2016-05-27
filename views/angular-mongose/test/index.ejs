@@ -25,16 +25,10 @@
 		</li>
 	</ul>
 
+	<mongoose-pagin ng-model="salonDao"></mongoose-pagin>
+
+
 	<hr>
-	
-	<ul>
-		<li><a href="" ng-click="salonDao.$setCurPage(1)">1</a></li>
-		<li><a href="" ng-click="salonDao.$setCurPage(2)">2</a></li>
-		<li><a href="" ng-click="salonDao.$setCurPage(3)">3</a></li>
-		<li><a href="" ng-click="salonDao.$setCurPage(4)">4</a></li>
-		<li><a href="" ng-click="salonDao.$setCurPage(5)">5</a></li>
-		<li><a href="" ng-click="salonDao.$setCurPage(6)">6</a></li>
-	</ul>
 
 
 	<p>
@@ -49,9 +43,6 @@
 
 	  <hr>
 
-	      	<h4>Default</h4>
-    <h4>Limit the maximum visible buttons</h4>
-    <h6><code>rotate</code> defaulted to <code>true</code>:</h6>
 
     <input type="button" value="添加" ng-click="addNewPojo()">
     56745676jk<input type="text" ng-model="salonDao.$query.$$_qq" value="56745676jk">
@@ -75,7 +66,18 @@
 	items-per-page - > pageSize
 	-->
 
-	<mongoose-pagin ng-model="salonDao"></mongoose-pagin>
 
+
+
+	<ul>
+		<li ng-repeat="salon in arrayPagin.$array">
+			<span>序号:{{$index  + 1}}</span>
+			<span>会所名:{{ salon.title }}</span>
+			<span>会所QQ:{{ salon.qq }}</span>
+			<span>创建日期:{{ salon.creatTime | date:'yyyy-MM-dd' }}</span>
+			<span><a ng-click="arrayPagin.$remove(salon)">删除</a> <a href="" ng-click="updateLason(salon)">修改</a></span>
+		</li>
+	</ul>
+	<mongoose-pagin ng-model="arrayPagin"></mongoose-pagin>
 </body>
 </html>

@@ -1,11 +1,11 @@
-/*!
+/*
  * mongoose对象的构造器。这里定义了该对象的所有方法
  * @auther yq
  * @Copyright(c) 2016 YeQin
  * @MIT Licensed
  * @API
  * ------------------------------------------------
- * 1.$link					链接数据库
+ * 1.__link					链接数据库
  * 2.$getData				获取后台数据
  * 3.__setHttp				注入http服务
  * 4.$setCurPage			跳转到指定页
@@ -14,6 +14,7 @@
  * 7.$update				更新一条数据到数据库,刷新当前页.
  * 8.$search 				查询数据，页面刷新到第一页.
  * ------------------------------------------------
+ * 
  */
 
 /**
@@ -31,6 +32,7 @@ var Mongoose;
 
 module.exports = Mongoose =  function(){
 
+	//分页信息
 	this.$pagingInfo = {
 	    total:0,
 	    curPage:1,
@@ -39,6 +41,7 @@ module.exports = Mongoose =  function(){
 	    waterfull:false,
 	};
 
+	//查询信息
 	this.$searchInfo = {
 	    query:{},
 	    sort:null,
@@ -75,7 +78,7 @@ Mongoose.prototype.__setHttp = function(http){
  * @param  {String} url 后台地址
  * @return {mongoose} 返回mongoose对象     
  */
-Mongoose.prototype.$link = function(url){
+Mongoose.prototype.__link = function(url){
 	util.checkSetting(this);
 
 	this.$searchInfo.url = url;

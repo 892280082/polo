@@ -15,6 +15,8 @@
  * 8.save               保存对象
  * 9.remove             删除数据
  * 10.update            更新数据
+ * 11.getSlice          获取指定位置数组
+ * 12.arrayRemovePojo   删除数组内元素
  * ------------------------------------------------
  */
 
@@ -23,7 +25,7 @@
  * @private
  */
 var log = require('./log');
-var _ = require('underscore');
+var _ = require('./miniunder');
 
 
 exports.concactArray =  function(array1,array2){
@@ -42,7 +44,7 @@ function dealSearchContain (key,val) {
     };
 
     key = key.replace(/-/g,".");//-转换成.
-    var conditions = ['$$_','$gt_','$gte_','$lt_','$lte_'];
+    var conditions = ['$$_','$gt_','$gte_','$lt_','$lte_','$ne_'];
 
     var delKey = _.find(conditions,function(ele){
         return key.indexOf(ele) >= 0;
@@ -237,4 +239,25 @@ exports.update = function(pojo,callback,mongoose){
     
 };
 
+/**
+ * @param  {Array} array 数组
+ * @param  {Number} curPage 开始下表
+ * @param  {Number} pageSize 截取数量
+ */
+exports.getSlice = function(array,curPage,pageSize){
+    curPage--;
 
+    var index = curPage*pageSize;
+    return  array.slice(index,index+pageSize);
+};
+
+/**
+ * @param  {Array} array 制定数组
+ * @param  {Object} pojo  数组内元素
+ */
+exports.arrayRemovePojo = function(array,pojo){
+    var index = array.indexOf(pojo);
+    if (index > -1) {
+        array.splice(index, 1);
+    }
+};

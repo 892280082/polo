@@ -5,7 +5,7 @@
  * Version: 1.3.3 - 2016-05-22
  * License: MIT
  */
-angular.module("ui.bootstrap", ["ui.bootstrap.tpls","ui.bootstrap.pagination","ui.bootstrap.paging"]);
+angular.module("ui.bootstrap_pagination", ["ui.bootstrap.tpls","ui.bootstrap.pagination","ui.bootstrap.paging"]);
 angular.module("ui.bootstrap.tpls", ["uib/template/pagination/pagination.html"]);
 angular.module('ui.bootstrap.pagination', ['ui.bootstrap.paging'])
 .controller('UibPaginationController', ['$scope', '$attrs', '$parse', 'uibPaging', 'uibPaginationConfig', function($scope, $attrs, $parse, uibPaging, uibPaginationConfig) {
