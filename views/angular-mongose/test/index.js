@@ -29,7 +29,7 @@ app.controller('main', ['$scope','mongoose','$timeout'
 	};
 
 	$scope.removePojo = (pojo)=>{
-		salonDao.$remove(pojo,(err,info)=>{x
+		salonDao.$remove(pojo,(err,info)=>{
 			console.log('remove- -->',err,info);
 		});	
 	};

@@ -73,7 +73,7 @@ angular.module(exportName,['ui.bootstrap_pagination','mongoose-pagination.html']
     return new ArrayPagin().__init(array,pageSize,waterfull);
   };
 
-}]).directive('mongoosePagin', ['$log', function($log){
+}]).directive('mongoosePagin', [function(){
   return {
     scope: {
       ngModel:'=ngModel'

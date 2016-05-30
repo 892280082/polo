@@ -10,9 +10,10 @@ var frontMiddle = require("../../middleware/front_mw.js");
 var Student  = require('../../models/Student');
 
 
+
 //mongoose 测试页面
 router.get('/mongoose',(req,res)=>{
-	res.render('angular-mongose/test/index');
+	res.render('front/page/mongoose.ejs');
 });
 
 router.get('/mongooseAdd',(req,res)=>{

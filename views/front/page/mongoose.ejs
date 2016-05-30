@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp">
+<head>
+	<meta charset="UTF-8">
+	<title>mongoose</title>
+	<script language="javascript"  type="text/javascript"  src="/plugin/jquery/dist/jquery.min.js"></script>
+	<!--angular-->
+	<script language="javascript"  type="text/javascript"  src="/plugin/angular/angular.min.js"></script>
+	<script type="text/javascript" src="/front/dist/mongoose.js"></script>
+</head>
+<body ng-controller="main">
+	<h1>Mongoose</h1>
+	<table>
+		<tr ng-repeat="salon in salonDao.$array">
+				<td>{{ $index }}</td>
+				<td>{{ salon.title }}</td>
+				<td>{{ salon.qq }}</td>
+				<td>{{ salon.creatTime | date:'yyyy-MM-dd' }}</td>
+		</tr>	
+	</table>
+	<mongoose-pagin ng-model="salonDao"></mongoose-pagin>
+</body>
+</html>
