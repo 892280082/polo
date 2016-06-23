@@ -22,14 +22,14 @@ module.exports = {
 		root:"http://192.168.1.170:3000",//域名
 		port:3000,//app端口
 		uploadDir:'/upload',//配置文件上传目录,可设置相对和绝对目录
-		winUploadDir:"E:/upload",
+		winUploadDir:"D:/upload",
 		uploadMaxSize:1000*1000*20
 	},
 	/**
 	*@desc 配置mongodb数据库
 	*/
 	mongodb:{
-		open:true,//是否连接数据库
+		open:false,//是否连接数据库
 		db:'newproject',//数据库名称 _local_test
 		host:'localhost',//数据库地址
 		port:27017,//端口
@@ -47,4 +47,4 @@ module.exports = {
 		notFoundPage:'404.html',//配置404页面 根据relativePath路径判断
 		errPage:'500.html'//错误页面
 	},
-}
+};

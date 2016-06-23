@@ -20,11 +20,15 @@ var _consoleLog = function(fileName,api,err){
 
 function FileLogEntity(fileName){
 	this.fileName = fileName;
-	this.save = function(api,err){
+}
+
+FileLogEntity.prototype.save = function(api,err){
 		_consoleLog(this.fileName,api,err);
 
-		if(!Log)
+		if(!Log){
+			console.$log(1,"日志保存错误:未链接数据库-->"+api);
 			return;
+		}
 
 		Log.create({
 			fileName:this.fileName,
@@ -35,8 +39,7 @@ function FileLogEntity(fileName){
 				console.$log(2,"日志保存错误");
 			}
 		});
-	};
-}
+};
 
 //初始化
 var init = function(collectName){
