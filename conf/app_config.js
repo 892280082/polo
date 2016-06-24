@@ -46,5 +46,5 @@ module.exports = {
 		extName:'ejs',//视图文件的后缀名,开发时路径中不能出现.ejs否则将报404错误
 		notFoundPage:'404.html',//配置404页面 根据relativePath路径判断
 		errPage:'500.html'//错误页面
-	},
+	}
 };

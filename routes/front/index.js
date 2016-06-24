@@ -9,8 +9,6 @@ var Salon = require("../../models/Salon.js");
 var frontMiddle = require("../../middleware/front_mw.js");
 var Student  = require('../../models/Student');
 
-
-
 //mongoose 测试页面
 router.get('/mongoose',(req,res)=>{
 	res.render('front/page/mongoose.ejs');
@@ -62,9 +60,6 @@ router.get('/addStu',(req,res)=>{
 	Student.create(student,(err)=>{
 		res.json({err:err});
 	});
-
-
-
 });
 
 router.get('/stuList',(req,res)=>{

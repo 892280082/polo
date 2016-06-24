@@ -49,11 +49,7 @@ app.set('env');//开发模式
 /**
  * @desc 配置开发模式和日志
  */
-if(config.main.model){
-	app.set('env','development');
-}else{
-	app.set('env','product');
-}
+app.set('env',config.main.model ? 'development' : 'product');
 
 /**
  * 处理日志
@@ -65,49 +61,61 @@ app.use(logger('dev'));
  * 		 这里将views和public文件夹都进行公开,
  * 		 但是views目录下将限制视图后缀文件的访问
  */
-var viewConfig = config.view;
-if(viewConfig.engine == 'ejs'){
-	app.engine('.html', ejs.__express);
-	app.set('views', path.join(__dirname, viewConfig.relativePath));
-	app.set('view engine', viewConfig.extName);
-	app.set('404page',viewConfig.notFoundPage);
-	app.set('500page',viewConfig.errPage);
-}else{
-	console.$log(2,"配置错误:目前仅支持ejs");
-}
-var pathReg = new RegExp("."+viewConfig.extName);
-app.use(function(req,res,next){
-	if(pathReg.test(req.path.split("?")[0])){
-		res.redirect('/404.html');
+(function(){
+	var viewConfig = config.view;
+
+	if(viewConfig.engine == 'ejs'){
+		app.engine('.html', ejs.__express);
+		app.set('views', path.join(__dirname, viewConfig.relativePath));
+		app.set('view engine', viewConfig.extName);
+		app.set('404page',viewConfig.notFoundPage);
+		app.set('500page',viewConfig.errPage);
 	}else{
-		next();
+		console.$log(2,"配置错误:目前仅支持ejs");
 	}
-});
-app.use(express.static(viewConfig.relativePath));
+
+	var pathReg = new RegExp("."+viewConfig.extName);
+	app.use(function(req,res,next){
+		if(pathReg.test(req.path.split("?")[0])){
+			res.redirect('/404.html');
+		}else{
+			next();
+		}
+	});
+
+	app.use(express.static(viewConfig.relativePath));
+
+})();
+
+
+
 
 //判断操作系统
-var system = process.platform;
-console.$log(0,'当前系统:',system);
+(function(){
+	var system = process.platform;
+	console.$log(0,'当前系统:',system);
 
-if(system.indexOf('win32') >-1 || system.indexOf('win64') >-1) {
-	app.set('isWindow',true);
-}else{
-	app.set('isLinux',true);
-}
+	var flag = system.indexOf('win32') >-1 || system.indexOf('win64') >-1;
+
+	app.set("isWindow",flag);
+	app.set("isLinux",!flag);
+
+})();
+
 
 /**
  * @desc 配置文件上传路径
  */
-function getResovlePath(){
-	var path;
-	if(app.get('isWindow')){ //判断是window系统
-		path = config.main.winUploadDir;
-	}else{ //如果是Linux或者mac
+(function(){
+	var path = config.main.winUploadDir;
+
+	if(app.get('isLinux')){ //判断是window系统
 		path =  config.main.uploadDir;
 		if (path.indexOf('/') !== 0){
-			path = path.join(__dirname, path);
+			path = path.join(__dirname, path);//设置相对路径
 		}
 	}
+
 	if(path){ //如果设置了path路径 则创建path文件夹目录
 		dirUtil.createPaths([path,path+'/images',path+'/file',path+'/video'],(err)=>{
 			if(err)
@@ -116,9 +124,9 @@ function getResovlePath(){
 	}
 	
 	console.$log(0,"文件上传地址:"+path);
-	return path;
-}
-app.set('upload_file',getResovlePath());
+
+	app.set('upload_file',path);
+})();
 
 /**
  * @desc 配置解析request的中间件
@@ -130,45 +138,47 @@ app.use(cookieParser());//解析cookie
 /**
  * @desc 配置数据库和session
  */
-if(config.mongodb.open) {
-	var dataOpenDebug  = (err)=>{
-		if(err){
-			console.$log(2,"数据库连接错误:",err);
-		}else{
-			var logCollect = config.mongodb.logCollect;
-			if(logCollect){
-				logUtil.init(logCollect);
+(function(){
+	if(config.mongodb.open) {
+		var dataOpenDebug  = (err)=>{
+			if(err){
+				console.$log(2,"数据库连接错误:",err);
+			}else{
+				var logCollect = config.mongodb.logCollect;
+				if(logCollect){
+					logUtil.init(logCollect);
+				}
+				console.$log(0,"mongoose:数据库连接成功");
 			}
-			console.$log(0,"mongoose:数据库连接成功");
-		}
 
-	};
-	var mongoUrl = 'mongodb://' + config.mongodb.host + ":" +
-		(config.mongodb.port || 27017) + "/" + config.mongodb.db;
+		};
+		var mongoUrl = 'mongodb://' + config.mongodb.host + ":" +
+			(config.mongodb.port || 27017) + "/" + config.mongodb.db;
 
 
-	console.$log(0,"数据库连接地址: " + mongoUrl);
+		console.$log(0,"数据库连接地址: " + mongoUrl);
 
-	var  mongooseDb = mongoose.connect(mongoUrl);
-	mongooseDb.connection.on('open', function (err) {
-		dataOpenDebug(err);
-	});
-	mongooseDb.connection.on('error', function (err) {
-		dataOpenDebug(err);
-	});
-	app.use(session({ //配置mongodb为session容器
-		resave: false,
-		saveUninitialized: true,
-		secret:config.mongodb.cookieSecret,
-		key:config.mongodb.db,
-		cookie:{ secure:false,maxAge:config.mongodb.sessionMaxAge},
-		store:new MongoStore({
-			db:config.mongodb.db,
-			host:config.mongodb.host,
-			port:config.mongodb.port
-		})
-	}));
-}
+		var  mongooseDb = mongoose.connect(mongoUrl);
+		mongooseDb.connection.on('open', function (err) {
+			dataOpenDebug(err);
+		});
+		mongooseDb.connection.on('error', function (err) {
+			dataOpenDebug(err);
+		});
+		app.use(session({ //配置mongodb为session容器
+			resave: false,
+			saveUninitialized: true,
+			secret:config.mongodb.cookieSecret,
+			key:config.mongodb.db,
+			cookie:{ secure:false,maxAge:config.mongodb.sessionMaxAge},
+			store:new MongoStore({
+				db:config.mongodb.db,
+				host:config.mongodb.host,
+				port:config.mongodb.port
+			})
+		}));
+	}
+})();
 
 //配置路由
 app.use(ejsExtend.extend); //配置EJS扩展

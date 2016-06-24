@@ -2,10 +2,10 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var logSchema = new Schema({
-	fileName:String,
-	api:String,
-    content:String,
-    creatTime:{type:Date,default:Date.now}
+	fileName:String,//文件名
+	api:String,//报错API
+    content:String,//报错内容
+    creatTime:{type:Date,default:Date.now}//日志创建日期
 });
 
 var Log;
